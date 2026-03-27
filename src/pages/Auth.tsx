@@ -18,7 +18,7 @@ export default function Auth() {
       const { error } = await supabase.auth.signUp({
         email,
         password,
-        options: { emailRedirectTo: "https://mypersonalplanner.vercel.app/auth" },
+        options: { emailRedirectTo: "https://my-personal-planner-three.vercel.app/auth" },
       });
       if (error) toast.error(error.message);
       else toast.success("Check your email to confirm your account!");
@@ -29,7 +29,7 @@ export default function Auth() {
   const handleGoogle = async () => {
     const { error } = await supabase.auth.signInWithOAuth({
       provider: "google",
-      options: { redirectTo: "https://mypersonalplanner.vercel.app/auth" }
+      options: { redirectTo: "https://my-personal-planner-three.vercel.app/auth" }
     });
     if (error) toast.error(error.message);
   };
