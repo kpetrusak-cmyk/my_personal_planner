@@ -1,0 +1,155 @@
+@import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,600;1,400;1,600&family=Caveat:wght@400;500;600;700&family=Dancing+Script:wght@400;500;600;700&family=Kalam:wght@300;400;700&family=Patrick+Hand&family=Indie+Flower&family=Architects+Daughter&family=Lato:wght@300;400;700;900&display=swap');
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    --background: 30 33% 96%;
+    --foreground: 300 16% 25%;
+
+    --card: 30 33% 98%;
+    --card-foreground: 300 16% 25%;
+
+    --popover: 30 33% 98%;
+    --popover-foreground: 300 16% 25%;
+
+    --primary: 303 16% 42%;
+    --primary-foreground: 30 33% 98%;
+
+    --secondary: 300 20% 92%;
+    --secondary-foreground: 303 16% 42%;
+
+    --muted: 30 20% 93%;
+    --muted-foreground: 300 8% 50%;
+
+    --accent: 300 24% 76%;
+    --accent-foreground: 300 16% 20%;
+
+    --destructive: 0 65% 55%;
+    --destructive-foreground: 30 33% 98%;
+
+    --border: 300 15% 85%;
+    --input: 300 15% 85%;
+    --ring: 303 16% 42%;
+
+    --radius: 0.75rem;
+
+    --sidebar-background: 30 33% 97%;
+    --sidebar-foreground: 300 16% 25%;
+    --sidebar-primary: 303 16% 42%;
+    --sidebar-primary-foreground: 30 33% 98%;
+    --sidebar-accent: 300 20% 92%;
+    --sidebar-accent-foreground: 300 16% 25%;
+    --sidebar-border: 300 15% 88%;
+    --sidebar-ring: 303 16% 42%;
+
+    --plum: 303 16% 42%;
+    --plum-light: 300 24% 76%;
+    --cream: 30 33% 96%;
+    --cream-dark: 30 20% 90%;
+    --lavender: 300 24% 76%;
+    --lavender-light: 300 30% 92%;
+    --rose: 340 30% 80%;
+    --sage: 140 15% 70%;
+  }
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+
+  body {
+    @apply bg-background text-foreground antialiased;
+    font-family: 'Lato', sans-serif;
+  }
+
+  h1, h2, h3 {
+    font-family: 'Cormorant Garamond', serif;
+  }
+}
+
+@layer utilities {
+  .planner-heading {
+    font-family: 'Cormorant Garamond', serif;
+    font-style: italic;
+    font-weight: 600;
+    color: hsl(var(--plum));
+  }
+
+  .planner-handwritten {
+    font-family: var(--handwriting-font, 'Caveat'), cursive;
+    font-weight: 500;
+  }
+
+  .planner-card {
+    @apply bg-card rounded-xl border border-border/60;
+    box-shadow: 0 1px 3px hsl(var(--plum) / 0.06);
+  }
+
+  .planner-input {
+    font-family: var(--handwriting-font, 'Caveat'), cursive;
+    font-size: 1.125rem;
+    @apply bg-transparent border-b border-border/50 focus:border-primary/40 focus:outline-none transition-colors w-full py-1;
+  }
+
+  .bottom-nav-safe {
+    padding-bottom: calc(4.5rem + env(safe-area-inset-bottom, 0px));
+  }
+
+  .water-drop {
+    @apply w-7 h-7 cursor-pointer transition-all duration-200 active:scale-95;
+  }
+
+  .water-drop.filled {
+    color: hsl(210 55% 62%);
+    filter: drop-shadow(0 1px 2px hsl(210 55% 62% / 0.25));
+  }
+
+  .water-drop.empty {
+    color: hsl(var(--border));
+  }
+
+  .star-rating {
+    @apply cursor-pointer transition-all duration-150 active:scale-90;
+  }
+
+  .star-rating.filled {
+    color: hsl(42 90% 60%);
+  }
+
+  .no-scrollbar::-webkit-scrollbar { display: none; }
+  .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+
+  .star-rating.empty {
+    color: hsl(var(--border));
+  }
+
+  .paper-lined {
+    background-image: repeating-linear-gradient(
+      transparent,
+      transparent 31px,
+      hsl(var(--border)) 31px,
+      hsl(var(--border)) 32px
+    );
+    background-position-y: 8px;
+  }
+
+  .paper-dotted {
+    background-image: radial-gradient(
+      circle,
+      hsl(var(--border)) 1px,
+      transparent 1px
+    );
+    background-size: 24px 24px;
+  }
+
+  .paper-grid {
+    background-image:
+      linear-gradient(hsl(var(--border)) 1px, transparent 1px),
+      linear-gradient(90deg, hsl(var(--border)) 1px, transparent 1px);
+    background-size: 24px 24px;
+  }
+}
