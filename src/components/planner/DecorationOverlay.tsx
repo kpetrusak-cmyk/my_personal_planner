@@ -3,9 +3,18 @@ import { Palette } from "lucide-react";
 import { useDecorations, type PlacedItem, type DrawStroke, type WashiPattern } from "@/hooks/useDecorations";
 import { DecorationToolbar, type DecoTool, PEN_COLORS, HIGHLIGHTER_COLORS, renderWashiPattern } from "./DecorationToolbar";
 
+
 interface DecorationOverlayProps {
   pageKey: string;
   children: React.ReactNode;
+}
+
+const GRID_SIZE = 16;
+const WASHI_WIDTH = 34; // fixed width in px
+const DEFAULT_WASHI_LENGTH = 160;
+
+function snapToGrid(val: number) {
+  return Math.round(val / GRID_SIZE) * GRID_SIZE;
 }
 
 export function DecorationOverlay({ pageKey, children }: DecorationOverlayProps) {
@@ -16,6 +25,8 @@ export function DecorationOverlay({ pageKey, children }: DecorationOverlayProps)
   const [selectedWashi, setSelectedWashi] = useState<WashiPattern | null>(null);
   const [penColor, setPenColor] = useState(PEN_COLORS[0]);
   const [highlighterColor, setHighlighterColor] = useState(HIGHLIGHTER_COLORS[0]);
+  const [washiOrientation, setWashiOrientation] = useState<"horizontal" | "vertical">("horizontal");
+  const [washiLength, setWashiLength] = useState(DEFAULT_WASHI_LENGTH);
   const [, forceRender] = useState(0);
 
   const canvasRef = useRef<HTMLCanvasElement>(null);
@@ -217,13 +228,17 @@ export function DecorationOverlay({ pageKey, children }: DecorationOverlayProps)
         height: isUrl ? 60 : undefined,
       }]);
     } else if (activeTool === "washi" && selectedWashi) {
+      const snappedX = snapToGrid(pt.x - (washiOrientation === "horizontal" ? washiLength / 2 : WASHI_WIDTH / 2));
+      const snappedY = snapToGrid(pt.y - (washiOrientation === "vertical" ? washiLength / 2 : WASHI_WIDTH / 2));
       setPlaced(prev => [...prev, {
         id: crypto.randomUUID(),
         type: "washi",
         content: selectedWashi.name,
-        x: pt.x - 80, y: pt.y - 17,
+        x: snappedX, y: snappedY,
         washiPattern: selectedWashi,
-        rotation: (Math.random() - 0.5) * 4,
+        rotation: 0,
+        orientation: washiOrientation,
+        washiLength: washiLength,
       }]);
     }
   };
@@ -285,7 +300,7 @@ export function DecorationOverlay({ pageKey, children }: DecorationOverlayProps)
                   top: item.y - offsetY,
                   zIndex: 22,
                   cursor: decorating ? "grab" : "default",
-                  transform: item.rotation ? `rotate(${item.rotation}deg)` : undefined,
+                  transform: item.type === "sticker" && item.rotation ? `rotate(${item.rotation}deg)` : undefined,
                   pointerEvents: decorating ? "auto" : "none",
                   touchAction: decorating ? "none" : "auto",
                 }}
@@ -310,19 +325,26 @@ export function DecorationOverlay({ pageKey, children }: DecorationOverlayProps)
                     <span className="text-4xl drop-shadow-sm pointer-events-none">{item.content}</span>
                   )
                 ) : (
-                  item.washiPattern?.imageUrl ? (
-                    <div className="h-[34px] rounded-sm opacity-80 overflow-hidden pointer-events-none" style={{ width: 160 }}>
-                      <img src={item.washiPattern.imageUrl} alt="washi" className="w-full h-full object-cover" draggable={false} />
-                    </div>
-                  ) : (
-                    <div
-                      className="h-[34px] rounded-sm opacity-80 pointer-events-none"
-                      style={{
-                        width: 160,
-                        background: item.washiPattern ? renderWashiPattern(item.washiPattern) : "hsl(var(--accent))",
-                      }}
-                    />
-                  )
+                  (() => {
+                    const isVert = item.orientation === "vertical";
+                    const len = item.washiLength || DEFAULT_WASHI_LENGTH;
+                    const w = isVert ? WASHI_WIDTH : len;
+                    const h = isVert ? len : WASHI_WIDTH;
+                    return item.washiPattern?.imageUrl ? (
+                      <div className="rounded-sm opacity-80 overflow-hidden pointer-events-none" style={{ width: w, height: h }}>
+                        <img src={item.washiPattern.imageUrl} alt="washi" className="w-full h-full object-cover" draggable={false} />
+                      </div>
+                    ) : (
+                      <div
+                        className="rounded-sm opacity-80 pointer-events-none"
+                        style={{
+                          width: w,
+                          height: h,
+                          background: item.washiPattern ? renderWashiPattern(item.washiPattern) : "hsl(var(--accent))",
+                        }}
+                      />
+                    );
+                  })()
                 )}
               </div>
             );
@@ -353,6 +375,10 @@ export function DecorationOverlay({ pageKey, children }: DecorationOverlayProps)
           setPenColor={setPenColor}
           highlighterColor={highlighterColor}
           setHighlighterColor={setHighlighterColor}
+          washiOrientation={washiOrientation}
+          setWashiOrientation={setWashiOrientation}
+          washiLength={washiLength}
+          setWashiLength={setWashiLength}
           onUndo={undo}
           onClearAll={clearAll}
           onClose={() => setDecorating(false)}
