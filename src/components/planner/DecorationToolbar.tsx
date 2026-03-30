@@ -1,50 +1,122 @@
 import { useState, useEffect, useRef } from "react";
-import { Smile, Scissors, Pen, Highlighter, Eraser, Undo2, Trash2, Upload, Palette, X } from "lucide-react";
+import { Smile, Scissors, Pen, Highlighter, Eraser, Undo2, Trash2, Upload, Palette, X, Type, Bold } from "lucide-react";
 import { useAuth } from "@/hooks/useAuth";
 import { uploadDecorationImage, loadCustomUploads, deleteCustomUpload, type WashiPattern } from "@/hooks/useDecorations";
 
-export type DecoTool = "sticker" | "washi" | "pen" | "highlighter" | "eraser" | null;
+export type DecoTool = "sticker" | "washi" | "pen" | "highlighter" | "eraser" | "text" | null;
 
-const EMOJI_PACKS = {
-  "Flowers": ["🌸", "🌺", "🌻", "🌷", "🌹", "💐", "🌼", "🪻", "🌿", "🍀", "🌱", "🪴"],
-  "Stars & Hearts": ["⭐", "✨", "💫", "🌟", "💖", "💗", "💕", "❤️", "🩷", "🩵", "💜", "🤍"],
-  "Cute": ["🎀", "🧸", "🦋", "🐝", "🐞", "🌈", "☁️", "🍓", "🍰", "🧁", "🫧", "✏️"],
-  "Planner": ["📌", "📎", "🗓️", "📝", "✅", "⏰", "💡", "🎯", "🏷️", "📖", "🔖", "🗂️"],
-  "Weather": ["☀️", "🌤️", "⛅", "🌧️", "⛈️", "🌩️", "❄️", "🌬️", "🌊", "🌙", "🌕", "💧"],
-  "Food": ["🍕", "🥑", "🍩", "☕", "🧋", "🍪", "🍫", "🥐", "🧇", "🍑", "🍒", "🫐"],
-  "Animals": ["🐱", "🐶", "🦊", "🐰", "🐻", "🦄", "🐸", "🐧", "🦢", "🕊️", "🐾", "🦎"],
-  "Travel": ["✈️", "🗺️", "🏖️", "⛰️", "🎡", "🚲", "🌅", "🏕️", "🧳", "🗼", "🎪", "⛵"],
-  "Nature": ["🌙", "☀️", "🍂", "🍃", "🪵", "🌊", "🏔️", "🌴", "🦩", "🐚", "🍄", "🪷"],
-  "Seasonal": ["🎃", "🎄", "❄️", "🌞", "🎆", "🎇", "🧨", "🎊", "🎋", "🎑", "🪔", "🕯️"],
-  "Bills": ["🚗", "💳", "💡", "🏠", "📱", "💰", "🏦", "📺", "🌐", "⛽", "🔌", "💸"],
-  "Appointments": ["🩺", "🦷", "👁️", "🔧", "💈", "🏥", "💊", "🧑‍⚕️", "📋", "🐾", "👶", "📅"],
-  "Zodiac": ["♈", "♉", "♊", "♋", "♌", "♍", "♎", "♏", "♐", "♑", "♒", "♓"],
-  "Symbols": ["☮️", "☯️", "♾️", "🔮", "🧿", "🪬", "💎", "🪩", "🎵", "🎶", "🕯️", "🧘"],
-  "Holidays": ["🎂", "🎁", "🥳", "🎈", "🎉", "🪅", "🎊", "🕎", "🎄", "🐣", "🦃", "🎆"],
-  "Plant Care": ["💧", "🪴", "🌱", "🌿", "🌻", "🧴", "☀️", "🪻", "🍃", "🪣", "🧤", "🪏"],
-  "Payday": ["💰", "💵", "🤑", "💸", "🏦", "💳", "📅", "🎉", "🪙", "📊", "🧾", "✅"],
-  "Work": ["💼", "📚", "💻", "📝", "🎓", "📖", "🧠", "⏱️", "📋", "✏️", "🗂️", "🎯"],
-  "Pets": ["🐾", "🐶", "🐱", "🦴", "🐟", "🩺", "💊", "🧼", "🪮", "🥣", "🐕", "🐈"],
+// PNG sticker packs — each entry is a path under /stickers/
+const STICKER_PACKS: Record<string, string[]> = {
+  "Flowers": [
+    "/stickers/flowers/cherry-blossom.png",
+    "/stickers/flowers/hibiscus.png",
+    "/stickers/flowers/sunflower.png",
+    "/stickers/flowers/tulip.png",
+    "/stickers/flowers/rose.png",
+    "/stickers/flowers/bouquet.png",
+    "/stickers/flowers/daisy.png",
+    "/stickers/flowers/lavender.png",
+    "/stickers/flowers/clover.png",
+    "/stickers/flowers/seedling.png",
+    "/stickers/flowers/potted-plant.png",
+    "/stickers/flowers/leaves.png",
+  ],
+  "Stars & Hearts": [
+    "/stickers/stars-hearts/star.png",
+    "/stickers/stars-hearts/sparkle.png",
+    "/stickers/stars-hearts/heart-pink.png",
+    "/stickers/stars-hearts/heart-red.png",
+    "/stickers/stars-hearts/rainbow.png",
+  ],
+  "Cute": [
+    "/stickers/cute/bow.png",
+    "/stickers/cute/teddy-bear.png",
+    "/stickers/cute/butterfly.png",
+    "/stickers/cute/strawberry.png",
+    "/stickers/cute/cupcake.png",
+  ],
+  "Planner": [
+    "/stickers/planner/pushpin.png",
+    "/stickers/planner/paperclip.png",
+    "/stickers/planner/checkmark.png",
+    "/stickers/planner/alarm-clock.png",
+    "/stickers/planner/lightbulb.png",
+    "/stickers/planner/target.png",
+  ],
+  "Animals": [
+    "/stickers/animals/cat.png",
+    "/stickers/animals/dog.png",
+    "/stickers/animals/fox.png",
+    "/stickers/animals/bunny.png",
+    "/stickers/animals/unicorn.png",
+  ],
+  "Food": [
+    "/stickers/food/pizza.png",
+    "/stickers/food/coffee.png",
+    "/stickers/food/donut.png",
+    "/stickers/food/avocado.png",
+    "/stickers/food/cookie.png",
+    "/stickers/food/boba.png",
+  ],
+  "Travel": [
+    "/stickers/travel/airplane.png",
+    "/stickers/travel/beach.png",
+    "/stickers/travel/mountain.png",
+    "/stickers/travel/suitcase.png",
+    "/stickers/travel/bicycle.png",
+    "/stickers/travel/camping.png",
+  ],
+  "Nature": [
+    "/stickers/nature/moon.png",
+    "/stickers/nature/sun.png",
+    "/stickers/nature/autumn-leaves.png",
+    "/stickers/nature/wave.png",
+    "/stickers/nature/mushroom.png",
+    "/stickers/nature/seashell.png",
+  ],
+  "Seasonal": [
+    "/stickers/seasonal/pumpkin.png",
+    "/stickers/seasonal/christmas-tree.png",
+    "/stickers/seasonal/snowflake.png",
+    "/stickers/seasonal/fireworks.png",
+    "/stickers/seasonal/birthday-cake.png",
+    "/stickers/seasonal/gift.png",
+  ],
+  "Bills": [
+    "/stickers/bills/money.png",
+    "/stickers/bills/credit-card.png",
+    "/stickers/bills/house.png",
+    "/stickers/bills/piggy-bank.png",
+    "/stickers/bills/receipt.png",
+  ],
+  "Appointments": [
+    "/stickers/appointments/stethoscope.png",
+    "/stickers/appointments/tooth.png",
+    "/stickers/appointments/clipboard.png",
+    "/stickers/appointments/medicine.png",
+    "/stickers/appointments/appointment.png",
+  ],
   "Custom": [],
 };
 
+// PNG washi patterns — each maps to a file under /washi/
 export const WASHI_PATTERNS: WashiPattern[] = [
-  { name: "Rose", colors: ["hsl(340, 30%, 80%)", "hsl(340, 30%, 85%)"], style: "striped" },
-  { name: "Lavender", colors: ["hsl(300, 24%, 76%)", "hsl(300, 30%, 85%)"], style: "dotted" },
-  { name: "Sage", colors: ["hsl(140, 15%, 70%)", "hsl(140, 15%, 78%)"], style: "striped" },
-  { name: "Cream", colors: ["hsl(30, 33%, 90%)", "hsl(30, 20%, 85%)"], style: "solid" },
-  { name: "Plum", colors: ["hsl(303, 16%, 42%)", "hsl(303, 16%, 52%)"], style: "striped" },
-  { name: "Gold", colors: ["hsl(42, 60%, 70%)", "hsl(42, 60%, 78%)"], style: "dotted" },
-  { name: "Sky", colors: ["hsl(200, 45%, 78%)", "hsl(200, 45%, 85%)"], style: "striped" },
-  { name: "Peach", colors: ["hsl(20, 60%, 82%)", "hsl(20, 50%, 88%)"], style: "solid" },
-  { name: "Mint", colors: ["hsl(160, 35%, 75%)", "hsl(160, 30%, 82%)"], style: "dotted" },
-  { name: "Coral", colors: ["hsl(10, 55%, 72%)", "hsl(10, 50%, 80%)"], style: "striped" },
-  { name: "Lilac", colors: ["hsl(270, 30%, 80%)", "hsl(270, 25%, 87%)"], style: "dotted" },
-  { name: "Blush", colors: ["hsl(350, 40%, 86%)", "hsl(350, 35%, 90%)"], style: "solid" },
-  { name: "Ocean", colors: ["hsl(210, 40%, 60%)", "hsl(210, 35%, 70%)"], style: "striped" },
-  { name: "Honey", colors: ["hsl(38, 65%, 72%)", "hsl(38, 55%, 80%)"], style: "dotted" },
-  { name: "Moss", colors: ["hsl(100, 20%, 55%)", "hsl(100, 18%, 65%)"], style: "striped" },
-  { name: "Dusk", colors: ["hsl(260, 20%, 65%)", "hsl(260, 18%, 75%)"], style: "solid" },
+  { name: "Rose", colors: [], style: "image", imageUrl: "/washi/rose.png" },
+  { name: "Lavender", colors: [], style: "image", imageUrl: "/washi/lavender.png" },
+  { name: "Sage", colors: [], style: "image", imageUrl: "/washi/sage.png" },
+  { name: "Cream", colors: [], style: "image", imageUrl: "/washi/cream.png" },
+  { name: "Plum", colors: [], style: "image", imageUrl: "/washi/plum.png" },
+  { name: "Gold", colors: [], style: "image", imageUrl: "/washi/gold.png" },
+  { name: "Sky", colors: [], style: "image", imageUrl: "/washi/sky.png" },
+  { name: "Peach", colors: [], style: "image", imageUrl: "/washi/peach.png" },
+  { name: "Mint", colors: [], style: "image", imageUrl: "/washi/mint.png" },
+  { name: "Coral", colors: [], style: "image", imageUrl: "/washi/coral.png" },
+  { name: "Lilac", colors: [], style: "image", imageUrl: "/washi/lilac.png" },
+  { name: "Blush", colors: [], style: "image", imageUrl: "/washi/blush.png" },
+  { name: "Ocean", colors: [], style: "image", imageUrl: "/washi/ocean.png" },
+  { name: "Honey", colors: [], style: "image", imageUrl: "/washi/honey.png" },
+  { name: "Moss", colors: [], style: "image", imageUrl: "/washi/moss.png" },
+  { name: "Dusk", colors: [], style: "image", imageUrl: "/washi/dusk.png" },
 ];
 
 export const PEN_COLORS = [
@@ -73,7 +145,7 @@ export function renderWashiPattern(pattern: WashiPattern) {
   if (pattern.style === "dotted") {
     return `radial-gradient(circle 2px, ${pattern.colors[1]} 100%, transparent 100%), ${pattern.colors[0]}`;
   }
-  return pattern.colors[0];
+  return pattern.colors[0] || "hsl(var(--accent))";
 }
 
 interface DecorationToolbarProps {
@@ -91,6 +163,8 @@ interface DecorationToolbarProps {
   setWashiOrientation: (o: "horizontal" | "vertical") => void;
   washiLength: number;
   setWashiLength: (l: number) => void;
+  isBold: boolean;
+  setIsBold: (b: boolean) => void;
   onUndo: () => void;
   onClearAll: () => void;
   onClose: () => void;
@@ -104,14 +178,14 @@ export function DecorationToolbar({
   highlighterColor, setHighlighterColor,
   washiOrientation, setWashiOrientation,
   washiLength, setWashiLength,
+  isBold, setIsBold,
   onUndo, onClearAll, onClose,
 }: DecorationToolbarProps) {
   const { user } = useAuth();
-  const [emojiPack, setEmojiPack] = useState<keyof typeof EMOJI_PACKS>("Flowers");
+  const [stickerPack, setStickerPack] = useState<keyof typeof STICKER_PACKS>("Flowers");
   const [customStickers, setCustomStickers] = useState<string[]>([]);
   const [customWashi, setCustomWashi] = useState<string[]>([]);
   const [uploading, setUploading] = useState(false);
-  const fileRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
     if (!user) return;
@@ -154,6 +228,7 @@ export function DecorationToolbar({
   const toolButtons: { tool: DecoTool; icon: React.ElementType; label: string }[] = [
     { tool: "sticker", icon: Smile, label: "Stickers" },
     { tool: "washi", icon: Scissors, label: "Washi" },
+    { tool: "text", icon: Type, label: "Text" },
     { tool: "pen", icon: Pen, label: "Pen" },
     { tool: "highlighter", icon: Highlighter, label: "Highlight" },
     { tool: "eraser", icon: Eraser, label: "Eraser" },
@@ -194,23 +269,23 @@ export function DecorationToolbar({
           ))}
         </div>
 
-        {/* Sticker picker */}
+        {/* Sticker picker — now PNG images */}
         {activeTool === "sticker" && (
           <div className="space-y-2">
             <div className="flex gap-1 overflow-x-auto no-scrollbar">
-              {Object.keys(EMOJI_PACKS).map((pack) => (
+              {Object.keys(STICKER_PACKS).map((pack) => (
                 <button
                   key={pack}
-                  onClick={() => setEmojiPack(pack as keyof typeof EMOJI_PACKS)}
+                  onClick={() => setStickerPack(pack as keyof typeof STICKER_PACKS)}
                   className={`px-2 py-1 rounded-full text-[10px] font-semibold whitespace-nowrap transition-all ${
-                    emojiPack === pack ? "bg-primary text-primary-foreground" : "bg-secondary/50 text-foreground/60"
+                    stickerPack === pack ? "bg-primary text-primary-foreground" : "bg-secondary/50 text-foreground/60"
                   }`}
                 >
                   {pack}
                 </button>
               ))}
             </div>
-            {emojiPack === "Custom" ? (
+            {stickerPack === "Custom" ? (
               <div className="space-y-2">
                 <div className="grid grid-cols-6 gap-1">
                   {customStickers.map((url) => (
@@ -221,7 +296,7 @@ export function DecorationToolbar({
                           selectedEmoji === url ? "bg-primary/15 ring-2 ring-primary/40" : "hover:bg-secondary/40"
                         }`}
                       >
-                        <img src={url} alt="custom sticker" className="w-full h-full object-contain" />
+                        <img src={url} alt="custom sticker" className="w-full h-full object-contain" loading="lazy" />
                       </button>
                       <button
                         onClick={() => handleDelete(url, "sticker")}
@@ -243,21 +318,21 @@ export function DecorationToolbar({
               </div>
             ) : (
               <div className="grid grid-cols-6 gap-1">
-                {EMOJI_PACKS[emojiPack].map((emoji) => (
+                {STICKER_PACKS[stickerPack].map((src) => (
                   <button
-                    key={emoji}
-                    onClick={() => setSelectedEmoji(selectedEmoji === emoji ? null : emoji)}
-                    className={`text-2xl p-1 rounded-lg transition-all active:scale-90 ${
-                      selectedEmoji === emoji ? "bg-primary/15 ring-2 ring-primary/40" : "hover:bg-secondary/40"
+                    key={src}
+                    onClick={() => setSelectedEmoji(selectedEmoji === src ? null : src)}
+                    className={`p-1 rounded-lg transition-all active:scale-90 aspect-square ${
+                      selectedEmoji === src ? "bg-primary/15 ring-2 ring-primary/40" : "hover:bg-secondary/40"
                     }`}
                   >
-                    {emoji}
+                    <img src={src} alt="sticker" className="w-full h-full object-contain" loading="lazy" />
                   </button>
                 ))}
               </div>
             )}
             {/* Upload shortcut visible from any pack */}
-            {emojiPack !== "Custom" && (
+            {stickerPack !== "Custom" && (
               <button
                 onClick={() => handleUpload("sticker")}
                 disabled={uploading}
@@ -273,7 +348,7 @@ export function DecorationToolbar({
           </div>
         )}
 
-        {/* Washi tape picker */}
+        {/* Washi tape picker — now PNG images */}
         {activeTool === "washi" && (
           <div className="space-y-2">
             <div className="grid grid-cols-2 gap-1.5">
@@ -284,8 +359,8 @@ export function DecorationToolbar({
                   className={`h-9 rounded-lg transition-all active:scale-95 relative overflow-hidden ${
                     selectedWashi?.name === pattern.name ? "ring-2 ring-primary/60" : ""
                   }`}
-                  style={{ background: renderWashiPattern(pattern) }}
                 >
+                  <img src={pattern.imageUrl} alt={pattern.name} className="w-full h-full object-cover" loading="lazy" />
                   <span className="absolute inset-0 flex items-center justify-center text-[10px] font-bold text-foreground/60 mix-blend-multiply">
                     {pattern.name}
                   </span>
@@ -302,7 +377,7 @@ export function DecorationToolbar({
                       selectedWashi?.imageUrl === url ? "ring-2 ring-primary/60" : ""
                     }`}
                   >
-                    <img src={url} alt="custom washi" className="w-full h-full object-cover" />
+                    <img src={url} alt="custom washi" className="w-full h-full object-cover" loading="lazy" />
                   </button>
                   <button
                     onClick={() => handleDelete(url, "washi")}
@@ -352,6 +427,24 @@ export function DecorationToolbar({
               </div>
             </div>
             {selectedWashi && <p className="text-[10px] text-muted-foreground text-center">Tap on the page to place washi tape</p>}
+          </div>
+        )}
+
+        {/* Text tool */}
+        {activeTool === "text" && (
+          <div className="space-y-2">
+            <p className="text-[10px] text-muted-foreground text-center">Tap on the page to add a text decoration</p>
+            <div className="flex items-center justify-center gap-2">
+              <button
+                onClick={() => setIsBold(!isBold)}
+                className={`flex items-center gap-1 px-3 py-1.5 rounded-lg text-[11px] font-semibold transition-all active:scale-95 ${
+                  isBold ? "bg-primary text-primary-foreground" : "bg-secondary/60 text-foreground/70"
+                }`}
+              >
+                <Bold className="w-3.5 h-3.5" />
+                Bold
+              </button>
+            </div>
           </div>
         )}
 
