@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef } from "react";
-import { Smile, Scissors, Pen, Highlighter, Eraser, Undo2, Trash2, Upload, Palette, X, Type, Bold } from "lucide-react";
+import { Smile, Scissors, Pen, Highlighter, Eraser, Undo2, Trash2, Upload, Palette, X, Type, Bold, ChevronDown, ChevronRight } from "lucide-react";
 import { useAuth } from "@/hooks/useAuth";
 import { uploadDecorationImage, loadCustomUploads, deleteCustomUpload, type WashiPattern } from "@/hooks/useDecorations";
 
@@ -99,25 +99,86 @@ const STICKER_PACKS: Record<string, string[]> = {
   "Custom": [],
 };
 
-// PNG washi patterns — each maps to a file under /washi/
-export const WASHI_PATTERNS: WashiPattern[] = [
-  { name: "Rose", colors: [], style: "image", imageUrl: "/washi/rose.png" },
-  { name: "Lavender", colors: [], style: "image", imageUrl: "/washi/lavender.png" },
-  { name: "Sage", colors: [], style: "image", imageUrl: "/washi/sage.png" },
-  { name: "Cream", colors: [], style: "image", imageUrl: "/washi/cream.png" },
-  { name: "Plum", colors: [], style: "image", imageUrl: "/washi/plum.png" },
-  { name: "Gold", colors: [], style: "image", imageUrl: "/washi/gold.png" },
-  { name: "Sky", colors: [], style: "image", imageUrl: "/washi/sky.png" },
-  { name: "Peach", colors: [], style: "image", imageUrl: "/washi/peach.png" },
-  { name: "Mint", colors: [], style: "image", imageUrl: "/washi/mint.png" },
-  { name: "Coral", colors: [], style: "image", imageUrl: "/washi/coral.png" },
-  { name: "Lilac", colors: [], style: "image", imageUrl: "/washi/lilac.png" },
-  { name: "Blush", colors: [], style: "image", imageUrl: "/washi/blush.png" },
-  { name: "Ocean", colors: [], style: "image", imageUrl: "/washi/ocean.png" },
-  { name: "Honey", colors: [], style: "image", imageUrl: "/washi/honey.png" },
-  { name: "Moss", colors: [], style: "image", imageUrl: "/washi/moss.png" },
-  { name: "Dusk", colors: [], style: "image", imageUrl: "/washi/dusk.png" },
-];
+// PNG washi patterns organized by category
+export const WASHI_CATEGORIES: Record<string, WashiPattern[]> = {
+  "Classic": [
+    { name: "Rose", colors: [], style: "image", imageUrl: "/washi/rose.png" },
+    { name: "Lavender", colors: [], style: "image", imageUrl: "/washi/lavender.png" },
+    { name: "Sage", colors: [], style: "image", imageUrl: "/washi/sage.png" },
+    { name: "Cream", colors: [], style: "image", imageUrl: "/washi/cream.png" },
+    { name: "Plum", colors: [], style: "image", imageUrl: "/washi/plum.png" },
+    { name: "Gold", colors: [], style: "image", imageUrl: "/washi/gold.png" },
+    { name: "Sky", colors: [], style: "image", imageUrl: "/washi/sky.png" },
+    { name: "Peach", colors: [], style: "image", imageUrl: "/washi/peach.png" },
+    { name: "Mint", colors: [], style: "image", imageUrl: "/washi/mint.png" },
+    { name: "Coral", colors: [], style: "image", imageUrl: "/washi/coral.png" },
+    { name: "Lilac", colors: [], style: "image", imageUrl: "/washi/lilac.png" },
+    { name: "Blush", colors: [], style: "image", imageUrl: "/washi/blush.png" },
+    { name: "Ocean", colors: [], style: "image", imageUrl: "/washi/ocean.png" },
+    { name: "Honey", colors: [], style: "image", imageUrl: "/washi/honey.png" },
+    { name: "Moss", colors: [], style: "image", imageUrl: "/washi/moss.png" },
+    { name: "Dusk", colors: [], style: "image", imageUrl: "/washi/dusk.png" },
+  ],
+  "Floral": [
+    { name: "Cherry Blossom", colors: [], style: "image", imageUrl: "/washi/floral/cherry-blossom.png" },
+    { name: "Sunflower", colors: [], style: "image", imageUrl: "/washi/floral/sunflower.png" },
+    { name: "Wildflower", colors: [], style: "image", imageUrl: "/washi/floral/wildflower.png" },
+    { name: "Rose Vine", colors: [], style: "image", imageUrl: "/washi/floral/rose-vine.png" },
+    { name: "Daisy", colors: [], style: "image", imageUrl: "/washi/floral/daisy.png" },
+  ],
+  "Holidays": [
+    { name: "Christmas", colors: [], style: "image", imageUrl: "/washi/holidays/christmas.png" },
+    { name: "Easter", colors: [], style: "image", imageUrl: "/washi/holidays/easter.png" },
+    { name: "Valentines", colors: [], style: "image", imageUrl: "/washi/holidays/valentines.png" },
+    { name: "Halloween", colors: [], style: "image", imageUrl: "/washi/holidays/halloween.png" },
+    { name: "Birthday", colors: [], style: "image", imageUrl: "/washi/holidays/birthday.png" },
+  ],
+  "Seasons": [
+    { name: "Spring", colors: [], style: "image", imageUrl: "/washi/seasons/spring.png" },
+    { name: "Summer", colors: [], style: "image", imageUrl: "/washi/seasons/summer.png" },
+    { name: "Autumn", colors: [], style: "image", imageUrl: "/washi/seasons/autumn.png" },
+    { name: "Winter", colors: [], style: "image", imageUrl: "/washi/seasons/winter.png" },
+  ],
+  "Minimal": [
+    { name: "Stripes", colors: [], style: "image", imageUrl: "/washi/minimal/stripes.png" },
+    { name: "Dots", colors: [], style: "image", imageUrl: "/washi/minimal/dots.png" },
+    { name: "Grid", colors: [], style: "image", imageUrl: "/washi/minimal/grid.png" },
+    { name: "Crosshatch", colors: [], style: "image", imageUrl: "/washi/minimal/crosshatch.png" },
+  ],
+  "Patterns": [
+    { name: "Chevron", colors: [], style: "image", imageUrl: "/washi/patterns/chevron.png" },
+    { name: "Plaid", colors: [], style: "image", imageUrl: "/washi/patterns/plaid.png" },
+    { name: "Gingham", colors: [], style: "image", imageUrl: "/washi/patterns/gingham.png" },
+    { name: "Argyle", colors: [], style: "image", imageUrl: "/washi/patterns/argyle.png" },
+  ],
+  "Neutral": [
+    { name: "Linen", colors: [], style: "image", imageUrl: "/washi/neutral/linen.png" },
+    { name: "Kraft", colors: [], style: "image", imageUrl: "/washi/neutral/kraft.png" },
+    { name: "Terrazzo", colors: [], style: "image", imageUrl: "/washi/neutral/terrazzo.png" },
+    { name: "Oatmeal", colors: [], style: "image", imageUrl: "/washi/neutral/oatmeal.png" },
+  ],
+  "Cute": [
+    { name: "Cats", colors: [], style: "image", imageUrl: "/washi/cute/cats.png" },
+    { name: "Stars & Moons", colors: [], style: "image", imageUrl: "/washi/cute/stars-moons.png" },
+    { name: "Rainbows", colors: [], style: "image", imageUrl: "/washi/cute/rainbows.png" },
+    { name: "Sweets", colors: [], style: "image", imageUrl: "/washi/cute/sweets.png" },
+  ],
+  "Functional": [
+    { name: "Checklist", colors: [], style: "image", imageUrl: "/washi/functional/checklist.png" },
+    { name: "Schedule", colors: [], style: "image", imageUrl: "/washi/functional/schedule.png" },
+    { name: "Days", colors: [], style: "image", imageUrl: "/washi/functional/days.png" },
+    { name: "Dividers", colors: [], style: "image", imageUrl: "/washi/functional/dividers.png" },
+  ],
+  "Abstract": [
+    { name: "Watercolor", colors: [], style: "image", imageUrl: "/washi/abstract/watercolor.png" },
+    { name: "Geometric", colors: [], style: "image", imageUrl: "/washi/abstract/geometric.png" },
+    { name: "Marble", colors: [], style: "image", imageUrl: "/washi/abstract/marble.png" },
+    { name: "Splatter", colors: [], style: "image", imageUrl: "/washi/abstract/splatter.png" },
+  ],
+};
+
+// Flat list for backward compat
+export const WASHI_PATTERNS: WashiPattern[] = Object.values(WASHI_CATEGORIES).flat();
 
 export const PEN_COLORS = [
   "hsl(303, 16%, 42%)",
@@ -185,6 +246,7 @@ export function DecorationToolbar({
   const [stickerPack, setStickerPack] = useState<keyof typeof STICKER_PACKS>("Flowers");
   const [customStickers, setCustomStickers] = useState<string[]>([]);
   const [customWashi, setCustomWashi] = useState<string[]>([]);
+  const [expandedWashiCategory, setExpandedWashiCategory] = useState<string | null>("Classic");
   const [uploading, setUploading] = useState(false);
 
   useEffect(() => {
@@ -348,23 +410,40 @@ export function DecorationToolbar({
           </div>
         )}
 
-        {/* Washi tape picker — now PNG images */}
+        {/* Washi tape picker — categorized PNG images */}
         {activeTool === "washi" && (
           <div className="space-y-2">
-            <div className="grid grid-cols-2 gap-1.5">
-              {WASHI_PATTERNS.map((pattern) => (
-                <button
-                  key={pattern.name}
-                  onClick={() => setSelectedWashi(selectedWashi?.name === pattern.name ? null : pattern)}
-                  className={`h-9 rounded-lg transition-all active:scale-95 relative overflow-hidden ${
-                    selectedWashi?.name === pattern.name ? "ring-2 ring-primary/60" : ""
-                  }`}
-                >
-                  <img src={pattern.imageUrl} alt={pattern.name} className="w-full h-full object-cover" loading="lazy" />
-                  <span className="absolute inset-0 flex items-center justify-center text-[10px] font-bold text-foreground/60 mix-blend-multiply">
-                    {pattern.name}
-                  </span>
-                </button>
+            {/* Category list */}
+            <div className="space-y-1 max-h-[200px] overflow-y-auto">
+              {Object.entries(WASHI_CATEGORIES).map(([category, patterns]) => (
+                <div key={category}>
+                  <button
+                    onClick={() => setExpandedWashiCategory(expandedWashiCategory === category ? null : category)}
+                    className="flex items-center gap-1 w-full px-2 py-1.5 rounded-md text-[11px] font-semibold text-foreground/70 hover:bg-secondary/40 transition-all"
+                  >
+                    {expandedWashiCategory === category ? <ChevronDown className="w-3 h-3" /> : <ChevronRight className="w-3 h-3" />}
+                    {category}
+                    <span className="text-[9px] text-muted-foreground ml-1">({patterns.length})</span>
+                  </button>
+                  {expandedWashiCategory === category && (
+                    <div className="grid grid-cols-2 gap-1.5 px-1 pb-1">
+                      {patterns.map((pattern) => (
+                        <button
+                          key={pattern.imageUrl}
+                          onClick={() => setSelectedWashi(selectedWashi?.imageUrl === pattern.imageUrl ? null : pattern)}
+                          className={`h-9 rounded-lg transition-all active:scale-95 relative overflow-hidden ${
+                            selectedWashi?.imageUrl === pattern.imageUrl ? "ring-2 ring-primary/60" : ""
+                          }`}
+                        >
+                          <img src={pattern.imageUrl} alt={pattern.name} className="w-full h-full object-cover" loading="lazy" />
+                          <span className="absolute inset-0 flex items-center justify-center text-[10px] font-bold text-foreground/60 mix-blend-multiply">
+                            {pattern.name}
+                          </span>
+                        </button>
+                      ))}
+                    </div>
+                  )}
+                </div>
               ))}
             </div>
             {/* Custom washi */}

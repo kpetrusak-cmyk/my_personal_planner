@@ -11,70 +11,90 @@ interface DecorationOverlayProps {
 }
 
 const GRID_SIZE = 16;
-const WASHI_WIDTH = 34;
+const DEFAULT_WASHI_WIDTH = 34;
 const DEFAULT_WASHI_LENGTH = 160;
 const MIN_WASHI_LENGTH = 48;
 const MAX_WASHI_LENGTH = 600;
+const MIN_WASHI_THICKNESS = 16;
+const MAX_WASHI_THICKNESS = 120;
 const DEFAULT_STICKER_SIZE = 60;
 const MIN_STICKER_SIZE = 24;
 const MAX_STICKER_SIZE = 200;
+const DEFAULT_TEXT_WIDTH = 120;
+const DEFAULT_TEXT_HEIGHT = 30;
+const DEFAULT_TEXT_FONT_SIZE = 14;
+const MIN_TEXT_WIDTH = 40;
+const MAX_TEXT_WIDTH = 500;
 
 function snapToGrid(val: number) {
   return Math.round(val / GRID_SIZE) * GRID_SIZE;
 }
 
-// ---- Resize handles for washi ----
+// ---- Resize handles for washi (length + thickness) ----
 function WashiResizeHandles({
   item,
   onResize,
   onToggleOrientation,
 }: {
   item: PlacedItem;
-  onResize: (id: string, newLength: number, newX: number, newY: number) => void;
+  onResize: (id: string, newLength: number, newThickness: number, newX: number, newY: number) => void;
   onToggleOrientation: (id: string) => void;
 }) {
   const isVert = item.orientation === "vertical";
   const len = item.washiLength || DEFAULT_WASHI_LENGTH;
-  const w = isVert ? WASHI_WIDTH : len;
-  const h = isVert ? len : WASHI_WIDTH;
+  const thickness = isVert ? (item.width || DEFAULT_WASHI_WIDTH) : (item.height || DEFAULT_WASHI_WIDTH);
+  const w = isVert ? thickness : len;
+  const h = isVert ? len : thickness;
 
   const resizingRef = useRef<{
-    edge: "start" | "end";
+    edge: "start" | "end" | "thick-start" | "thick-end";
     startClient: number;
     origLength: number;
+    origThickness: number;
     origX: number;
     origY: number;
   } | null>(null);
 
   const handleResizeStart = useCallback(
-    (edge: "start" | "end", e: React.MouseEvent | React.TouchEvent) => {
+    (edge: "start" | "end" | "thick-start" | "thick-end", e: React.MouseEvent | React.TouchEvent) => {
       e.stopPropagation();
       e.preventDefault();
+      const isThickness = edge.startsWith("thick");
+      const axis = isThickness ? (isVert ? "x" : "y") : (isVert ? "y" : "x");
       const clientVal = "touches" in e
-        ? (isVert ? e.touches[0].clientY : e.touches[0].clientX)
-        : (isVert ? (e as React.MouseEvent).clientY : (e as React.MouseEvent).clientX);
-      resizingRef.current = { edge, startClient: clientVal, origLength: len, origX: item.x, origY: item.y };
+        ? (axis === "y" ? e.touches[0].clientY : e.touches[0].clientX)
+        : (axis === "y" ? (e as React.MouseEvent).clientY : (e as React.MouseEvent).clientX);
+      resizingRef.current = { edge, startClient: clientVal, origLength: len, origThickness: thickness, origX: item.x, origY: item.y };
 
       const onMove = (ev: MouseEvent | TouchEvent) => {
         if (!resizingRef.current) return;
         ev.preventDefault();
         const cur = "touches" in ev
-          ? (isVert ? ev.touches[0].clientY : ev.touches[0].clientX)
-          : (isVert ? ev.clientY : ev.clientX);
+          ? (axis === "y" ? ev.touches[0].clientY : ev.touches[0].clientX)
+          : (axis === "y" ? ev.clientY : ev.clientX);
         const delta = cur - resizingRef.current.startClient;
         const r = resizingRef.current;
-        let newLength: number, newX = r.origX, newY = r.origY;
-        if (r.edge === "end") {
+        let newLength = r.origLength, newThickness = r.origThickness, newX = r.origX, newY = r.origY;
+
+        if (edge === "end") {
           newLength = snapToGrid(Math.max(MIN_WASHI_LENGTH, Math.min(MAX_WASHI_LENGTH, r.origLength + delta)));
-        } else {
+        } else if (edge === "start") {
           const rawDelta = snapToGrid(delta);
           newLength = Math.max(MIN_WASHI_LENGTH, Math.min(MAX_WASHI_LENGTH, r.origLength - rawDelta));
           newLength = snapToGrid(newLength);
           const actualDelta = r.origLength - newLength;
           if (isVert) newY = r.origY + actualDelta;
           else newX = r.origX + actualDelta;
+        } else if (edge === "thick-end") {
+          newThickness = Math.max(MIN_WASHI_THICKNESS, Math.min(MAX_WASHI_THICKNESS, r.origThickness + delta));
+        } else if (edge === "thick-start") {
+          const rawDelta = delta;
+          newThickness = Math.max(MIN_WASHI_THICKNESS, Math.min(MAX_WASHI_THICKNESS, r.origThickness - rawDelta));
+          const actualDelta = r.origThickness - newThickness;
+          if (isVert) newX = r.origX + actualDelta;
+          else newY = r.origY + actualDelta;
         }
-        onResize(item.id, newLength, newX, newY);
+        onResize(item.id, newLength, newThickness, newX, newY);
       };
 
       const onEnd = () => {
@@ -90,29 +110,50 @@ function WashiResizeHandles({
       window.addEventListener("touchmove", onMove, { passive: false });
       window.addEventListener("touchend", onEnd);
     },
-    [item.id, item.x, item.y, len, isVert, onResize]
+    [item.id, item.x, item.y, len, thickness, isVert, onResize]
   );
 
   const handleSize = 14;
-  const handleClass = "absolute bg-primary/80 border-2 border-background rounded-full shadow-md cursor-ew-resize z-[35] active:scale-110 transition-transform";
-  const vertHandleClass = "absolute bg-primary/80 border-2 border-background rounded-full shadow-md cursor-ns-resize z-[35] active:scale-110 transition-transform";
+  const lengthHandleClass = isVert
+    ? "absolute bg-primary/80 border-2 border-background rounded-full shadow-md cursor-ns-resize z-[35] active:scale-110 transition-transform"
+    : "absolute bg-primary/80 border-2 border-background rounded-full shadow-md cursor-ew-resize z-[35] active:scale-110 transition-transform";
+  const thickHandleClass = isVert
+    ? "absolute bg-accent-foreground/60 border-2 border-background rounded-full shadow-md cursor-ew-resize z-[35] active:scale-110 transition-transform"
+    : "absolute bg-accent-foreground/60 border-2 border-background rounded-full shadow-md cursor-ns-resize z-[35] active:scale-110 transition-transform";
 
   return (
     <>
       <div className="absolute border-2 border-primary/40 border-dashed rounded-sm pointer-events-none" style={{ left: -2, top: -2, width: w + 4, height: h + 4 }} />
+      {/* Length handles */}
       {isVert ? (
         <>
-          <div className={vertHandleClass} style={{ left: w / 2 - handleSize / 2, top: -handleSize / 2 - 2, width: handleSize, height: handleSize }}
+          <div className={lengthHandleClass} style={{ left: w / 2 - handleSize / 2, top: -handleSize / 2 - 2, width: handleSize, height: handleSize }}
             onMouseDown={(e) => handleResizeStart("start", e)} onTouchStart={(e) => handleResizeStart("start", e)} />
-          <div className={vertHandleClass} style={{ left: w / 2 - handleSize / 2, top: h - handleSize / 2 + 2, width: handleSize, height: handleSize }}
+          <div className={lengthHandleClass} style={{ left: w / 2 - handleSize / 2, top: h - handleSize / 2 + 2, width: handleSize, height: handleSize }}
             onMouseDown={(e) => handleResizeStart("end", e)} onTouchStart={(e) => handleResizeStart("end", e)} />
         </>
       ) : (
         <>
-          <div className={handleClass} style={{ left: -handleSize / 2 - 2, top: h / 2 - handleSize / 2, width: handleSize, height: handleSize }}
+          <div className={lengthHandleClass} style={{ left: -handleSize / 2 - 2, top: h / 2 - handleSize / 2, width: handleSize, height: handleSize }}
             onMouseDown={(e) => handleResizeStart("start", e)} onTouchStart={(e) => handleResizeStart("start", e)} />
-          <div className={handleClass} style={{ left: w - handleSize / 2 + 2, top: h / 2 - handleSize / 2, width: handleSize, height: handleSize }}
+          <div className={lengthHandleClass} style={{ left: w - handleSize / 2 + 2, top: h / 2 - handleSize / 2, width: handleSize, height: handleSize }}
             onMouseDown={(e) => handleResizeStart("end", e)} onTouchStart={(e) => handleResizeStart("end", e)} />
+        </>
+      )}
+      {/* Thickness handles */}
+      {isVert ? (
+        <>
+          <div className={thickHandleClass} style={{ left: -handleSize / 2 - 2, top: h / 2 - handleSize / 2, width: handleSize, height: handleSize }}
+            onMouseDown={(e) => handleResizeStart("thick-start", e)} onTouchStart={(e) => handleResizeStart("thick-start", e)} />
+          <div className={thickHandleClass} style={{ left: w - handleSize / 2 + 2, top: h / 2 - handleSize / 2, width: handleSize, height: handleSize }}
+            onMouseDown={(e) => handleResizeStart("thick-end", e)} onTouchStart={(e) => handleResizeStart("thick-end", e)} />
+        </>
+      ) : (
+        <>
+          <div className={thickHandleClass} style={{ left: w / 2 - handleSize / 2, top: -handleSize / 2 - 2, width: handleSize, height: handleSize }}
+            onMouseDown={(e) => handleResizeStart("thick-start", e)} onTouchStart={(e) => handleResizeStart("thick-start", e)} />
+          <div className={thickHandleClass} style={{ left: w / 2 - handleSize / 2, top: h - handleSize / 2 + 2, width: handleSize, height: handleSize }}
+            onMouseDown={(e) => handleResizeStart("thick-end", e)} onTouchStart={(e) => handleResizeStart("thick-end", e)} />
         </>
       )}
       <button
@@ -187,12 +228,67 @@ function StickerResizeHandles({
   );
 }
 
+// ---- Resize handles for text (corner drag, scales font proportionally) ----
+function TextResizeHandles({
+  item,
+  onResize,
+}: {
+  item: PlacedItem;
+  onResize: (id: string, newW: number, newH: number) => void;
+}) {
+  const w = item.width || DEFAULT_TEXT_WIDTH;
+  const h = item.height || DEFAULT_TEXT_HEIGHT;
+  const resizingRef = useRef<{ startX: number; origW: number; origH: number } | null>(null);
+
+  const handleStart = useCallback((e: React.MouseEvent | React.TouchEvent) => {
+    e.stopPropagation();
+    e.preventDefault();
+    const clientX = "touches" in e ? e.touches[0].clientX : (e as React.MouseEvent).clientX;
+    resizingRef.current = { startX: clientX, origW: w, origH: h };
+
+    const onMove = (ev: MouseEvent | TouchEvent) => {
+      if (!resizingRef.current) return;
+      ev.preventDefault();
+      const cx = "touches" in ev ? ev.touches[0].clientX : ev.clientX;
+      const r = resizingRef.current;
+      const delta = cx - r.startX;
+      const ratio = r.origH / r.origW;
+      const newW = Math.max(MIN_TEXT_WIDTH, Math.min(MAX_TEXT_WIDTH, r.origW + delta));
+      const newH = Math.round(newW * ratio);
+      onResize(item.id, newW, newH);
+    };
+    const onEnd = () => {
+      resizingRef.current = null;
+      window.removeEventListener("mousemove", onMove);
+      window.removeEventListener("mouseup", onEnd);
+      window.removeEventListener("touchmove", onMove);
+      window.removeEventListener("touchend", onEnd);
+    };
+    window.addEventListener("mousemove", onMove, { passive: false });
+    window.addEventListener("mouseup", onEnd);
+    window.addEventListener("touchmove", onMove, { passive: false });
+    window.addEventListener("touchend", onEnd);
+  }, [item.id, w, h, onResize]);
+
+  const handleSize = 12;
+  return (
+    <>
+      <div className="absolute border-2 border-primary/40 border-dashed rounded-sm pointer-events-none" style={{ left: -4, top: -4, width: w + 8, height: h + 8 }} />
+      <div
+        className="absolute bg-primary/80 border-2 border-background rounded-full shadow-md cursor-nwse-resize z-[35] active:scale-110 transition-transform"
+        style={{ left: w - handleSize / 2 + 2, top: h - handleSize / 2 + 2, width: handleSize, height: handleSize }}
+        onMouseDown={handleStart}
+        onTouchStart={handleStart}
+      />
+    </>
+  );
+}
+
 // ---- Draggable palette button ----
 function DraggablePaletteButton({ decorating, onToggle }: { decorating: boolean; onToggle: () => void }) {
   const [pos, setPos] = useState({ x: -1, y: -1 });
   const dragRef = useRef<{ startX: number; startY: number; origX: number; origY: number; moved: boolean } | null>(null);
 
-  // Initialize position
   useEffect(() => {
     if (pos.x === -1) {
       setPos({ x: window.innerWidth - 64, y: window.innerHeight - 140 });
@@ -428,9 +524,20 @@ export function DecorationOverlay({ pageKey, date, children }: DecorationOverlay
     };
   }, [setPlaced]);
 
-  // ---- Washi resize ----
-  const handleWashiResize = useCallback((id: string, newLength: number, newX: number, newY: number) => {
-    setPlaced(prev => prev.map(p => p.id === id ? { ...p, washiLength: newLength, x: newX, y: newY } : p));
+  // ---- Washi resize (length + thickness) ----
+  const handleWashiResize = useCallback((id: string, newLength: number, newThickness: number, newX: number, newY: number) => {
+    setPlaced(prev => prev.map(p => {
+      if (p.id !== id) return p;
+      const isVert = p.orientation === "vertical";
+      return {
+        ...p,
+        washiLength: newLength,
+        x: newX,
+        y: newY,
+        width: isVert ? newThickness : undefined,
+        height: isVert ? undefined : newThickness,
+      };
+    }));
   }, [setPlaced]);
 
   const handleToggleOrientation = useCallback((id: string) => {
@@ -442,6 +549,11 @@ export function DecorationOverlay({ pageKey, date, children }: DecorationOverlay
 
   // ---- Sticker resize ----
   const handleStickerResize = useCallback((id: string, newW: number, newH: number) => {
+    setPlaced(prev => prev.map(p => p.id === id ? { ...p, width: newW, height: newH } : p));
+  }, [setPlaced]);
+
+  // ---- Text resize ----
+  const handleTextResize = useCallback((id: string, newW: number, newH: number) => {
     setPlaced(prev => prev.map(p => p.id === id ? { ...p, width: newW, height: newH } : p));
   }, [setPlaced]);
 
@@ -458,8 +570,8 @@ export function DecorationOverlay({ pageKey, date, children }: DecorationOverlay
         width: DEFAULT_STICKER_SIZE, height: DEFAULT_STICKER_SIZE,
       }]);
     } else if (activeTool === "washi" && selectedWashi) {
-      const snappedX = snapToGrid(pt.x - (washiOrientation === "horizontal" ? washiLength / 2 : WASHI_WIDTH / 2));
-      const snappedY = snapToGrid(pt.y - (washiOrientation === "vertical" ? washiLength / 2 : WASHI_WIDTH / 2));
+      const snappedX = snapToGrid(pt.x - (washiOrientation === "horizontal" ? washiLength / 2 : DEFAULT_WASHI_WIDTH / 2));
+      const snappedY = snapToGrid(pt.y - (washiOrientation === "vertical" ? washiLength / 2 : DEFAULT_WASHI_WIDTH / 2));
       setPlaced(prev => [...prev, {
         id: crypto.randomUUID(), type: "washi", content: selectedWashi.name,
         x: snappedX, y: snappedY,
@@ -469,13 +581,10 @@ export function DecorationOverlay({ pageKey, date, children }: DecorationOverlay
     } else if (activeTool === "text") {
       const newId = crypto.randomUUID();
       setPlaced(prev => [...prev, {
-        id: newId, type: "sticker" as const, content: "__text__",
+        id: newId, type: "sticker" as const, content: `__text__${isBold ? "bold:" : ""}Type here`,
         x: snapToGrid(pt.x), y: snapToGrid(pt.y),
-        width: 120, height: 30,
-        // Store bold and text in content as a special format
+        width: DEFAULT_TEXT_WIDTH, height: DEFAULT_TEXT_HEIGHT,
       }]);
-      // We'll use a special content prefix for text items
-      setPlaced(prev => prev.map(p => p.id === newId ? { ...p, content: `__text__${isBold ? "bold:" : ""}Type here` } : p));
       setEditingTextId(newId);
       setSelectedItemId(newId);
     }
@@ -510,6 +619,12 @@ export function DecorationOverlay({ pageKey, date, children }: DecorationOverlay
     ));
   };
 
+  // Compute font size from width for text items
+  const getTextFontSize = (item: PlacedItem) => {
+    const w = item.width || DEFAULT_TEXT_WIDTH;
+    return Math.round(DEFAULT_TEXT_FONT_SIZE * (w / DEFAULT_TEXT_WIDTH));
+  };
+
   return (
     <div ref={containerRef} className="relative">
       {children}
@@ -532,6 +647,7 @@ export function DecorationOverlay({ pageKey, date, children }: DecorationOverlay
             const isSelected = decorating && selectedItemId === item.id;
             const textParsed = parseTextContent(item.content);
             const isTextItem = textParsed !== null;
+            const fontSize = isTextItem ? getTextFontSize(item) : undefined;
 
             return (
               <div
@@ -561,12 +677,12 @@ export function DecorationOverlay({ pageKey, date, children }: DecorationOverlay
 
                 {isTextItem ? (
                   // Text decoration
-                  <div className="relative" style={{ minWidth: 60 }}>
+                  <div className="relative" style={{ width: item.width || DEFAULT_TEXT_WIDTH, height: item.height || DEFAULT_TEXT_HEIGHT }}>
                     {editingTextId === item.id ? (
                       <input
                         autoFocus
-                        className="bg-transparent border-b-2 border-primary/50 outline-none text-sm px-1"
-                        style={{ fontWeight: textParsed.isBold ? "bold" : "normal", minWidth: 60 }}
+                        className="bg-transparent border-b-2 border-primary/50 outline-none px-1 w-full h-full"
+                        style={{ fontWeight: textParsed.isBold ? "bold" : "normal", fontSize: `${fontSize}px` }}
                         value={textParsed.text}
                         onChange={(e) => updateTextContent(item.id, e.target.value, textParsed.isBold)}
                         onBlur={() => setEditingTextId(null)}
@@ -576,15 +692,15 @@ export function DecorationOverlay({ pageKey, date, children }: DecorationOverlay
                       />
                     ) : (
                       <span
-                        className="text-sm pointer-events-none whitespace-nowrap"
-                        style={{ fontWeight: textParsed.isBold ? "bold" : "normal" }}
+                        className="pointer-events-none whitespace-nowrap"
+                        style={{ fontWeight: textParsed.isBold ? "bold" : "normal", fontSize: `${fontSize}px` }}
                       >
                         {textParsed.text || "Type here"}
                       </span>
                     )}
                     {isSelected && (
                       <>
-                        <div className="absolute border-2 border-primary/40 border-dashed rounded-sm pointer-events-none" style={{ left: -4, top: -4, right: -4, bottom: -4 }} />
+                        <TextResizeHandles item={item} onResize={handleTextResize} />
                         <button
                           className="absolute -top-6 -right-1 bg-primary text-primary-foreground rounded-full w-5 h-5 flex items-center justify-center shadow-md z-[36] active:scale-90 text-[10px] font-bold"
                           onMouseDown={(e) => { e.stopPropagation(); e.preventDefault(); }}
@@ -637,8 +753,9 @@ export function DecorationOverlay({ pageKey, date, children }: DecorationOverlay
                   (() => {
                     const isVert = item.orientation === "vertical";
                     const len = item.washiLength || DEFAULT_WASHI_LENGTH;
-                    const w = isVert ? WASHI_WIDTH : len;
-                    const h = isVert ? len : WASHI_WIDTH;
+                    const thickness = isVert ? (item.width || DEFAULT_WASHI_WIDTH) : (item.height || DEFAULT_WASHI_WIDTH);
+                    const w = isVert ? thickness : len;
+                    const h = isVert ? len : thickness;
                     return (
                       <div className="relative" style={{ width: w, height: h }}>
                         {item.washiPattern?.imageUrl ? (
