@@ -330,8 +330,16 @@ function DraggablePaletteButton({ decorating, onToggle }: { decorating: boolean;
 
   return (
     <button
-      onMouseDown={handleStart}
-      onTouchStart={handleStart}
+      onMouseDown={(e) => {
+        e.preventDefault();
+        e.stopPropagation();
+        handleStart(e);
+      }}
+      onTouchStart={(e) => {
+        e.preventDefault();
+        e.stopPropagation();
+        handleStart(e);
+      }}
       className={`fixed z-[60] w-12 h-12 rounded-full shadow-xl flex items-center justify-center ring-2 ring-background cursor-grab active:cursor-grabbing select-none ${
         decorating ? "bg-primary text-primary-foreground shadow-primary/30" : "bg-accent text-accent-foreground"
       }`}
