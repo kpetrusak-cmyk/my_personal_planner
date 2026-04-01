@@ -377,16 +377,58 @@ const handleStart = useCallback((e: React.MouseEvent | React.TouchEvent) => {
 }
 
 export function DecorationOverlay({ pageKey, date, children }: DecorationOverlayProps) {
-  const resolvedKey = useMemo(() => {
-    if (!date) return pageKey;
-    const DAILY_TABS = ["daily", "gratitude", "therapy", "priority_matrix"];
-    const WEEKLY_TABS = ["weekly", "meal_planner", "exercise", "cleaning"];
-    const MONTHLY_TABS = ["monthly", "sleep", "budget", "reflection"];
-    if (DAILY_TABS.includes(pageKey)) return `${pageKey}_${formatDateKey(date)}`;
-    if (WEEKLY_TABS.includes(pageKey)) return `${pageKey}_${formatDateKey(startOfWeek(date, { weekStartsOn: 0 }))}`;
-    if (MONTHLY_TABS.includes(pageKey)) return `${pageKey}_${formatDateKey(startOfMonth(date))}`;
+const resolvedKey = useMemo(() => {
+  // Pages without a date (notes, yearly goals, static pages)
+  if (!date) {
+    // Notes pages
+    if (
+      pageKey.startsWith("lined_notes") ||
+      pageKey.startsWith("dotted_notes") ||
+      pageKey.startsWith("grid_notes")
+    ) {
+      return `notes-${pageKey}`;
+    }
+
+    // Yearly goals page
+    if (pageKey === "yearly_goals") {
+      return `yearly-${new Date().getFullYear()}`;
+    }
+
     return pageKey;
-  }, [pageKey, date]);
+  }
+
+  // Tabs grouped by type
+  const DAILY_TABS = ["daily", "gratitude", "therapy", "priority_matrix"];
+  const WEEKLY_TABS = ["weekly", "meal_planner", "exercise", "cleaning"];
+  const MONTHLY_TABS = ["monthly", "sleep", "budget", "reflection"];
+  const YEARLY_TABS = ["yearly_goals"];
+
+  // Daily pages → daily-{tab}-YYYY-MM-DD
+  if (DAILY_TABS.includes(pageKey)) {
+    return `daily-${pageKey}-${format(date, "yyyy-MM-dd")}`;
+  }
+
+  // Weekly pages → weekly-{tab}-YYYY-WII
+  if (WEEKLY_TABS.includes(pageKey)) {
+    const weekStart = startOfWeek(date, { weekStartsOn: 0 });
+    return `weekly-${pageKey}-${format(weekStart, "yyyy")}-W${format(
+      weekStart,
+      "II"
+    )}`;
+  }
+
+  // Monthly pages → monthly-{tab}-YYYY-MM
+  if (MONTHLY_TABS.includes(pageKey)) {
+    return `monthly-${pageKey}-${format(date, "yyyy-MM")}`;
+  }
+
+  // Yearly pages → yearly-YYYY
+  if (YEARLY_TABS.includes(pageKey)) {
+    return `yearly-${format(date, "yyyy")}`;
+  }
+
+  return pageKey;
+}, [pageKey, date]);
 
   const { placed, strokes, loading, setPlaced, setStrokes, clearAll, undo } = useDecorations(resolvedKey);
   const [decorating, setDecorating] = useState(false);
