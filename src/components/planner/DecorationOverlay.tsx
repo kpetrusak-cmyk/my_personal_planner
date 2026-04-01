@@ -312,7 +312,7 @@ const handleStart = useCallback((e: React.MouseEvent | React.TouchEvent) => {
     const dx = mx - dragRef.current.startX;
     const dy = my - dragRef.current.startY;
 
-    if (Math.abs(dx) > 4 || Math.abs(dy) > 4) dragRef.current.moved = true;
+    if (Math.abs(dx) > 20 || Math.abs(dy) > 20) dragRef.current.moved = true;
 
     setPos({
       x: Math.max(8, Math.min(window.innerWidth - 56, dragRef.current.origX + dx)),
@@ -356,12 +356,14 @@ const handleStart = useCallback((e: React.MouseEvent | React.TouchEvent) => {
         e.preventDefault();
         e.stopPropagation();
         ignoreNextToggle.current = true;
+        onToggle();
         handleStart(e);
       }}
       onTouchStart={(e) => {
         e.preventDefault();
         e.stopPropagation();
         ignoreNextToggle.current = true;
+        onToggle();
         handleStart(e);
       }}
       className={`fixed z-[60] w-12 h-12 rounded-full shadow-xl flex items-center justify-center ring-2 ring-background cursor-grab active:cursor-grabbing select-none ${
