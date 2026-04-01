@@ -288,6 +288,7 @@ function TextResizeHandles({
 function DraggablePaletteButton({ decorating, onToggle }: { decorating: boolean; onToggle: () => void }) {
   const [pos, setPos] = useState({ x: -1, y: -1 });
   const dragRef = useRef<{ startX: number; startY: number; origX: number; origY: number; moved: boolean } | null>(null);
+  const ignoreNextToggle = useRef(false);
 
   useEffect(() => {
     if (pos.x === -1) {
@@ -320,8 +321,18 @@ function DraggablePaletteButton({ decorating, onToggle }: { decorating: boolean;
       window.removeEventListener("mouseup", onEnd);
       window.removeEventListener("touchmove", onMove);
       window.removeEventListener("touchend", onEnd);
-      if (!wasDrag) onToggle();
-    };
+      if (!wasDrag) {
+          // If the button already handled the toggle,
+          // skip the drag-end toggle to prevent double firing.
+          if (ignoreNextToggle.current) {
+            ignoreNextToggle.current = false;
+            return; // Prevent double toggle
+  }
+
+  // Otherwise, this was a true tap (not a drag),
+  // so allow the toggle to happen normally.
+  onToggle();
+}
     window.addEventListener("mousemove", onMove, { passive: false });
     window.addEventListener("mouseup", onEnd);
     window.addEventListener("touchmove", onMove, { passive: false });
@@ -333,11 +344,13 @@ function DraggablePaletteButton({ decorating, onToggle }: { decorating: boolean;
       onMouseDown={(e) => {
         e.preventDefault();
         e.stopPropagation();
+        ignoreNextToggle.current = true;
         handleStart(e);
       }}
       onTouchStart={(e) => {
         e.preventDefault();
         e.stopPropagation();
+        ignoreNextToggle.current = true;
         handleStart(e);
       }}
       className={`fixed z-[60] w-12 h-12 rounded-full shadow-xl flex items-center justify-center ring-2 ring-background cursor-grab active:cursor-grabbing select-none ${
