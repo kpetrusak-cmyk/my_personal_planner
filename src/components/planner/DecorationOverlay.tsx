@@ -312,7 +312,7 @@ const handleStart = useCallback((e: React.MouseEvent | React.TouchEvent) => {
     const dx = mx - dragRef.current.startX;
     const dy = my - dragRef.current.startY;
 
-    if (Math.abs(dx) > 20 || Math.abs(dy) > 20) dragRef.current.moved = true;
+    if (Math.abs(dx) > 15 || Math.abs(dy) > 15) dragRef.current.moved = true;
 
     setPos({
       x: Math.max(8, Math.min(window.innerWidth - 56, dragRef.current.origX + dx)),
