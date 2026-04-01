@@ -296,48 +296,59 @@ function DraggablePaletteButton({ decorating, onToggle }: { decorating: boolean;
     }
   }, []);
 
-  const handleStart = useCallback((e: React.MouseEvent | React.TouchEvent) => {
-    const cx = "touches" in e ? e.touches[0].clientX : (e as React.MouseEvent).clientX;
-    const cy = "touches" in e ? e.touches[0].clientY : (e as React.MouseEvent).clientY;
-    dragRef.current = { startX: cx, startY: cy, origX: pos.x, origY: pos.y, moved: false };
+const handleStart = useCallback((e: React.MouseEvent | React.TouchEvent) => {
+  const cx = "touches" in e ? e.touches[0].clientX : (e as React.MouseEvent).clientX;
+  const cy = "touches" in e ? e.touches[0].clientY : (e as React.MouseEvent).clientY;
 
-    const onMove = (ev: MouseEvent | TouchEvent) => {
-      if (!dragRef.current) return;
-      ev.preventDefault();
-      const mx = "touches" in ev ? ev.touches[0].clientX : ev.clientX;
-      const my = "touches" in ev ? ev.touches[0].clientY : ev.clientY;
-      const dx = mx - dragRef.current.startX;
-      const dy = my - dragRef.current.startY;
-      if (Math.abs(dx) > 4 || Math.abs(dy) > 4) dragRef.current.moved = true;
-      setPos({
-        x: Math.max(8, Math.min(window.innerWidth - 56, dragRef.current.origX + dx)),
-        y: Math.max(8, Math.min(window.innerHeight - 56, dragRef.current.origY + dy)),
-      });
-    };
-    const onEnd = () => {
-      const wasDrag = dragRef.current?.moved;
-      dragRef.current = null;
-      window.removeEventListener("mousemove", onMove);
-      window.removeEventListener("mouseup", onEnd);
-      window.removeEventListener("touchmove", onMove);
-      window.removeEventListener("touchend", onEnd);
-      if (!wasDrag) {
-          // If the button already handled the toggle,
-          // skip the drag-end toggle to prevent double firing.
-          if (ignoreNextToggle.current) {
-            ignoreNextToggle.current = false;
-            return; // Prevent double toggle
-  }
+  dragRef.current = { startX: cx, startY: cy, origX: pos.x, origY: pos.y, moved: false };
 
-  // Otherwise, this was a true tap (not a drag),
-  // so allow the toggle to happen normally.
-  onToggle();
-}
-    window.addEventListener("mousemove", onMove, { passive: false });
-    window.addEventListener("mouseup", onEnd);
-    window.addEventListener("touchmove", onMove, { passive: false });
-    window.addEventListener("touchend", onEnd);
-  }, [pos, onToggle]);
+  const onMove = (ev: MouseEvent | TouchEvent) => {
+    if (!dragRef.current) return;
+    ev.preventDefault();
+
+    const mx = "touches" in ev ? ev.touches[0].clientX : ev.clientX;
+    const my = "touches" in ev ? ev.touches[0].clientY : ev.clientY;
+
+    const dx = mx - dragRef.current.startX;
+    const dy = my - dragRef.current.startY;
+
+    if (Math.abs(dx) > 4 || Math.abs(dy) > 4) dragRef.current.moved = true;
+
+    setPos({
+      x: Math.max(8, Math.min(window.innerWidth - 56, dragRef.current.origX + dx)),
+      y: Math.max(8, Math.min(window.innerHeight - 56, dragRef.current.origY + dy)),
+    });
+  };
+
+  const onEnd = () => {
+    const wasDrag = dragRef.current?.moved;
+    dragRef.current = null;
+
+    window.removeEventListener("mousemove", onMove);
+    window.removeEventListener("mouseup", onEnd);
+    window.removeEventListener("touchmove", onMove);
+    window.removeEventListener("touchend", onEnd);
+
+    if (!wasDrag) {
+      // If the button already handled the toggle,
+      // skip the drag-end toggle to prevent double firing.
+      if (ignoreNextToggle.current) {
+        ignoreNextToggle.current = false;
+        return; // Prevent double toggle
+      }
+
+      // Otherwise, this was a true tap (not a drag),
+      // so allow the toggle to happen normally.
+      onToggle();
+    }
+  };
+
+  window.addEventListener("mousemove", onMove, { passive: false });
+  window.addEventListener("mouseup", onEnd);
+  window.addEventListener("touchmove", onMove, { passive: false });
+  window.addEventListener("touchend", onEnd);
+
+}, [pos, onToggle]);   // <-- THIS NOW MATCHES CORRECTLY
 
   return (
     <button
