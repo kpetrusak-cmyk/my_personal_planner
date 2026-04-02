@@ -137,9 +137,9 @@ const Index = () => {
       </div>
 
       <main className="max-w-2xl mx-auto px-4 py-4 bottom-nav-safe">
-        <DecorationOverlay pageKey={activeTab}>
-          {renderContent()}
-        </DecorationOverlay>
+        <DecorationOverlay pageKey={activeTab} date={planner.currentDate}>
+         {renderContent()}
+      </DecorationOverlay>
       </main>
 
       <BottomNav active={activeTab} onTabChange={setActiveTab} />
