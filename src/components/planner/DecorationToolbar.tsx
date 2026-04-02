@@ -50,6 +50,16 @@ const STICKER_PACKS: Record<string, string[]> = {
     "/stickers/animals/bunny.png",
     "/stickers/animals/unicorn.png",
   ],
+"Holidays": [
+  "/stickers/holidays/balloon.png",
+  "/stickers/holidays/candy-cane.png",
+  "/stickers/holidays/heart.png",
+  "/stickers/holidays/ornament.png",
+  "/stickers/holidays/party-popper.png",
+  "/stickers/holidays/shamrock.png",
+  "/stickers/holidays/sparkler.png",
+  "/stickers/holidays/star-gold.png",
+],
   "Food": [
     "/stickers/food/pizza.png",
     "/stickers/food/coffee.png",
@@ -58,6 +68,14 @@ const STICKER_PACKS: Record<string, string[]> = {
     "/stickers/food/cookie.png",
     "/stickers/food/boba.png",
   ],
+"Coffee & Meals": [
+  "/stickers/coffee-meals/breakfast.png",
+  "/stickers/coffee-meals/coffee-cup.png",
+  "/stickers/coffee-meals/dinner.png",
+  "/stickers/coffee-meals/latte.png",
+  "/stickers/coffee-meals/lunch-bag.png",
+  "/stickers/coffee-meals/tea.png",
+],
   "Travel": [
     "/stickers/travel/airplane.png",
     "/stickers/travel/beach.png",
@@ -82,6 +100,15 @@ const STICKER_PACKS: Record<string, string[]> = {
     "/stickers/seasonal/birthday-cake.png",
     "/stickers/seasonal/gift.png",
   ],
+  "School & Work": [
+  "/stickers/school-work/assignment.png",
+  "/stickers/school-work/deadline.png",
+  "/stickers/school-work/exam.png",
+  "/stickers/school-work/focus.png",
+  "/stickers/school-work/lecture.png",
+  "/stickers/school-work/meeting.png",
+  "/stickers/school-work/study.png",
+],
   "Bills": [
     "/stickers/bills/money.png",
     "/stickers/bills/credit-card.png",
