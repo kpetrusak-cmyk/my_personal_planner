@@ -119,3 +119,69 @@ export function useDecorations(resolvedKey: string) {
 
   return { placed, strokes, loading, setPlaced: updatePlaced, setStrokes: updateStrokes, clearAll, undo };
 }
+// Upload and auto-resize image
+export async function uploadDecorationImage(
+  file: File,
+  type: "sticker" | "washi",
+  userId: string
+): Promise<string | null> {
+  const maxSize = type === "sticker" ? 200 : 400;
+  const maxHeight = type === "sticker" ? 200 : 80;
+
+  return new Promise((resolve) => {
+    const img = new Image();
+    const reader = new FileReader();
+    reader.onload = (e) => {
+      img.onload = async () => {
+        let w = img.width;
+        let h = img.height;
+        if (w > maxSize || h > maxHeight) {
+          const ratio = Math.min(maxSize / w, maxHeight / h);
+          w = Math.round(w * ratio);
+          h = Math.round(h * ratio);
+        }
+
+        const canvas = document.createElement("canvas");
+        canvas.width = w;
+        canvas.height = h;
+        const ctx = canvas.getContext("2d")!;
+        ctx.drawImage(img, 0, 0, w, h);
+
+        canvas.toBlob(async (blob) => {
+          if (!blob) { resolve(null); return; }
+          const ext = "png";
+          const path = `${userId}/${type}s/${crypto.randomUUID()}.${ext}`;
+          const { error } = await supabase.storage
+            .from("planner-assets")
+            .upload(path, blob, { contentType: "image/png" });
+          if (error) { console.error("Upload error:", error); resolve(null); return; }
+          const { data } = supabase.storage.from("planner-assets").getPublicUrl(path);
+          resolve(data.publicUrl);
+        }, "image/png");
+      };
+      img.src = e.target?.result as string;
+    };
+    reader.readAsDataURL(file);
+  });
+}
+
+// Load user's custom uploads
+export async function loadCustomUploads(userId: string, type: "sticker" | "washi"): Promise<string[]> {
+  const { data, error } = await supabase.storage
+    .from("planner-assets")
+    .list(`${userId}/${type}s`, { limit: 50 });
+  if (error || !data) return [];
+  return data
+    .filter(f => f.name !== ".emptyFolderPlaceholder")
+    .map(f => supabase.storage.from("planner-assets").getPublicUrl(`${userId}/${type}s/${f.name}`).data.publicUrl);
+}
+
+// Delete a custom uploaded image
+export async function deleteCustomUpload(url: string, userId: string, type: "sticker" | "washi"): Promise<boolean> {
+  const prefix = `${userId}/${type}s/`;
+  const idx = url.indexOf(prefix);
+  if (idx === -1) return false;
+  const path = url.substring(idx);
+  const { error } = await supabase.storage.from("planner-assets").remove([path]);
+  return !error;
+}
