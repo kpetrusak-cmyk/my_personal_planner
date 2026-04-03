@@ -3,39 +3,11 @@ import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import { format, eachDayOfInterval, startOfMonth, endOfMonth, getDay } from "date-fns";
 
-function WaterCupIcon({ className }: { className?: string }) {
-  return (
-    <svg
-      viewBox="0 0 24 24"
-      className={className}
-      aria-hidden="true"
-    >
-      {/* Straw */}
-      <rect x="11" y="2" width="2" height="5" rx="0.5" fill="#d48ca8" />
-      {/* Lid */}
-      <rect x="7" y="6" width="10" height="2" rx="1" fill="#f3d7e3" />
-      {/* Cup body */}
-      <rect x="8" y="8" width="8" height="11" rx="3" fill="#f7c9dd" />
-      {/* Stainless rim */}
-      <rect x="8" y="7.5" width="8" height="1" fill="#d9d9dd" />
-      {/* Handle */}
-      <path
-        d="M16 9.5c1.8 0 3 1.3 3 3.2v3.6c0 1.4-0.9 2.4-2.2 2.4"
-        fill="none"
-        stroke="#f7c9dd"
-        strokeWidth="1.4"
-        strokeLinecap="round"
-      />
-    </svg>
-  );
-}
-
 const DEFAULT_HABITS = [
   { name: "Exercise", color: "#a8d5ba" },
   { name: "Read", color: "#aec6e0" },
   { name: "Meditate", color: "#c4a8c1" },
   { name: "Journal", color: "#f5c6aa" },
-  { name: "Water", color: "#5ab8ff" }, //
 ];
 
 const MONTHS = Array.from({ length: 12 }, (_, i) => i);
@@ -70,20 +42,10 @@ export function HabitTracker() {
 
   useEffect(() => { load(); }, [load]);
 
-  const toggle = async (habitIndex: number, dateKey: string) => {
+const toggle = async (habitIndex: number, dateKey: string) => {
   if (!user) return;
   const key = makeKey(habitIndex, dateKey);
-
-  let newVal;
-
-  if (habits[habitIndex].name === "Water") {
-    // Increment water count
-    const current = Number(data[key] || 0);
-    newVal = current + 1;
-  } else {
-    // Normal boolean toggle
-    newVal = !data[key];
-  }
+  const newVal = !data[key];
 
   setData((p) => ({ ...p, [key]: newVal }));
 
@@ -156,14 +118,7 @@ export function HabitTracker() {
                   className="w-full aspect-square rounded-sm text-[9px] font-semibold transition-all active:scale-90"
                   style={{ backgroundColor: done ? habit.color : "hsl(300 15% 85% / 0.3)" }}
                 >
-              {habits[hi].name === "Water" ? (
-                <div className="flex flex-wrap justify-center items-center">
-                  {Array.from({ length: Number(data[makeKey(hi, key)] || 0) }).map((_, i) => (
-                    <WaterCupIcon key={i} className="w-3=6 h-6" />
-                  ))}
-                </div>
-              ) : (
-              day.getDate()
+              {day.getDate()
               )}
                 </button>
               );
