@@ -118,8 +118,7 @@ const toggle = async (habitIndex: number, dateKey: string) => {
                   className="w-full aspect-square rounded-sm text-[9px] font-semibold transition-all active:scale-90"
                   style={{ backgroundColor: done ? habit.color : "hsl(300 15% 85% / 0.3)" }}
                 >
-              {day.getDate()
-              )}
+              {day.getDate()}
                 </button>
               );
             })}
