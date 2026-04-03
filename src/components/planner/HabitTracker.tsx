@@ -159,7 +159,7 @@ export function HabitTracker() {
               {habits[hi].name === "Water" ? (
                 <div className="flex flex-wrap justify-center items-center">
                   {Array.from({ length: Number(data[makeKey(hi, key)] || 0) }).map((_, i) => (
-                    <WaterCupIcon key={i} className="w-3 h-3" />
+                    <WaterCupIcon key={i} className="w-3=6 h-6" />
                   ))}
                 </div>
               ) : (
