@@ -3,6 +3,7 @@ import { Palette, RotateCw } from "lucide-react";
 import { useDecorations, type PlacedItem, type DrawStroke, type WashiPattern } from "@/hooks/useDecorations";
 import { DecorationToolbar, type DecoTool, PEN_COLORS, HIGHLIGHTER_COLORS, renderWashiPattern } from "./DecorationToolbar";
 import { formatDateKey, startOfWeek, startOfMonth } from "@/lib/dateUtils";
+import { format } from "date-fns";
 
 interface DecorationOverlayProps {
   pageKey: string;
