@@ -376,7 +376,7 @@ export function DecorationToolbar({
 
         {/* Sticker picker — collapsible categories */}
 {activeTool === "sticker" && (
-  <div className="space-y-2">
+  <div className="space-y-1 max-h-[200px] overflow-y-auto">
 
     {Object.entries(STICKER_CATEGORIES).map(([category, stickers]) => (
       <div key={category}>
@@ -405,20 +405,25 @@ export function DecorationToolbar({
           <div className="grid grid-cols-4 gap-1 px-1 pb-1">
 
             {/* Built‑in stickers */}
-            {stickers.map((sticker) => (
-              <button
-                key={sticker.imageUrl}
-                onClick={() => setSelectedSticker(sticker)}
-                className="p-1 rounded-lg hover:bg-secondary/40"
-              >
-                <img
-                  src={sticker.imageUrl}
-                  alt={sticker.name}
-                  className="w-full h-full object-contain"
-                />
-              </button>
-            ))}
-
+            {stickers.map((url) => (
+  <button
+    key={url}
+    onClick={() =>
+      setSelectedSticker({
+        name: category,
+        style: "image",
+        imageUrl: url,
+      })
+    }
+    className="p-1 rounded-lg hover:bg-secondary/40"
+  >
+    <img
+      src={url}
+      alt={category}
+      className="w-full h-full object-contain"
+    />
+  </button>
+))}
             {/* Custom Sticker Section */}
             {category === "Custom" && customStickers.length > 0 && (
               <div className="grid grid-cols-4 gap-1 mt-1 col-span-4">
@@ -464,7 +469,7 @@ export function DecorationToolbar({
 
 {/* Washi tape picker — categorized PNG images */}
 {activeTool === "washi" && (
-  <div className="space-y-2">
+  <div className="space-y-1 max-h-[200px] overflow-y-auto">
 
     {/* Category list */}
     <div className="space-y-1 max-h-[200px] overflow-y-auto">
