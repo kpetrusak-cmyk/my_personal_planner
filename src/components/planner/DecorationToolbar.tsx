@@ -218,6 +218,7 @@ export const WASHI_CATEGORIES: Record<string, WashiPattern[]> = {
     { name: "Splatter", colors: [], style: "image", imageUrl: "/washi/abstract/splatter.png" },
     { name: "Ink Brush", colors: [], style: "image", imageUrl: "/washi/abstract/ink-brush.png" },
   ],
+  "Custom": []
 };
 
 // Flat list for backward compat
@@ -286,11 +287,11 @@ export function DecorationToolbar({
   onUndo, onClearAll, onClose,
 }: DecorationToolbarProps) {
   const { user } = useAuth();
-  const [stickerPack, setStickerPack] = useState<keyof typeof STICKER_PACKS>("Flowers");
   const [customStickers, setCustomStickers] = useState<string[]>([]);
   const [customWashi, setCustomWashi] = useState<string[]>([]);
   const [expandedWashiCategory, setExpandedWashiCategory] = useState<string | null>("Classic");
   const [uploading, setUploading] = useState(false);
+  const [expandedStickerCategory, setExpandedStickerCategory] = useState<string | null>(null);
 
   useEffect(() => {
     if (!user) return;
@@ -373,183 +374,170 @@ export function DecorationToolbar({
           ))}
         </div>
 
-        {/* Sticker picker — now PNG images */}
-        {activeTool === "sticker" && (
-          <div className="space-y-2">
-            <div className="flex gap-1 overflow-x-auto no-scrollbar">
-              {Object.keys(STICKER_PACKS).map((pack) => (
-                <button
-                  key={pack}
-                  onClick={() => setStickerPack(pack as keyof typeof STICKER_PACKS)}
-                  className={`px-2 py-1 rounded-full text-[10px] font-semibold whitespace-nowrap transition-all ${
-                    stickerPack === pack ? "bg-primary text-primary-foreground" : "bg-secondary/50 text-foreground/60"
-                  }`}
-                >
-                  {pack}
-                </button>
-              ))}
-            </div>
-            {stickerPack === "Custom" ? (
-              <div className="space-y-2">
-                <div className="grid grid-cols-6 gap-1">
-                  {customStickers.map((url) => (
-                    <div key={url} className="relative group">
-                      <button
-                        onClick={() => setSelectedEmoji(selectedEmoji === url ? null : url)}
-                        className={`p-1 rounded-lg transition-all active:scale-90 aspect-square w-full ${
-                          selectedEmoji === url ? "bg-primary/15 ring-2 ring-primary/40" : "hover:bg-secondary/40"
-                        }`}
-                      >
-                        <img src={url} alt="custom sticker" className="w-full h-full object-contain" loading="lazy" />
-                      </button>
-                      <button
-                        onClick={() => handleDelete(url, "sticker")}
-                        className="absolute -top-1 -right-1 w-5 h-5 bg-destructive text-destructive-foreground rounded-full flex items-center justify-center active:scale-90 shadow-sm"
-                      >
-                        <X className="w-2.5 h-2.5" />
-                      </button>
-                    </div>
-                  ))}
+        {/* Sticker picker — collapsible categories */}
+{activeTool === "sticker" && (
+  <div className="space-y-2">
+
+    {Object.entries(STICKER_CATEGORIES).map(([category, stickers]) => (
+      <div key={category}>
+        {/* Category header */}
+        <button
+          onClick={() =>
+            setExpandedStickerCategory(
+              expandedStickerCategory === category ? null : category
+            )
+          }
+          className="flex items-center gap-1 w-full px-2 py-1.5 rounded-md text-[11px] font-semibold text-foreground/70 hover:bg-secondary/40 transition-all"
+        >
+          {expandedStickerCategory === category ? (
+            <ChevronDown className="w-3 h-3" />
+          ) : (
+            <ChevronRight className="w-3 h-3" />
+          )}
+          {category}
+          <span className="text-[9px] text-muted-foreground ml-1">
+            ({stickers.length})
+          </span>
+        </button>
+
+        {/* Expanded category content */}
+        {expandedStickerCategory === category && (
+          <div className="grid grid-cols-4 gap-1 px-1 pb-1">
+
+            {/* Built‑in stickers */}
+            {stickers.map((sticker) => (
+              <button
+                key={sticker.imageUrl}
+                onClick={() => setSelectedSticker(sticker)}
+                className="p-1 rounded-lg hover:bg-secondary/40"
+              >
+                <img
+                  src={sticker.imageUrl}
+                  alt={sticker.name}
+                  className="w-full h-full object-contain"
+                />
+              </button>
+            ))}
+
+            {/* Custom Sticker Section */}
+            {category === "Custom" && customStickers.length > 0 && (
+              <div className="grid grid-cols-4 gap-1 mt-1 col-span-4">
+                {customStickers.map((url) => (
                   <button
-                    onClick={() => handleUpload("sticker")}
-                    disabled={uploading}
-                    className="flex items-center justify-center p-1 rounded-lg border-2 border-dashed border-border/60 text-muted-foreground hover:bg-secondary/40 aspect-square active:scale-90"
+                    key={url}
+                    onClick={() =>
+                      setSelectedSticker({
+                        name: "Custom",
+                        style: "image",
+                        imageUrl: url,
+                      })
+                    }
+                    className="p-1 rounded-lg aspect-square w-full hover:bg-secondary/40"
                   >
-                    <Upload className="w-4 h-4" />
-                  </button>
-                </div>
-                {uploading && <p className="text-[10px] text-muted-foreground text-center animate-pulse">Uploading & resizing...</p>}
-              </div>
-            ) : (
-              <div className="grid grid-cols-6 gap-1">
-                {STICKER_PACKS[stickerPack].map((src) => (
-                  <button
-                    key={src}
-                    onClick={() => setSelectedEmoji(selectedEmoji === src ? null : src)}
-                    className={`p-1 rounded-lg transition-all active:scale-90 aspect-square ${
-                      selectedEmoji === src ? "bg-primary/15 ring-2 ring-primary/40" : "hover:bg-secondary/40"
-                    }`}
-                  >
-                    <img src={src} alt="sticker" className="w-full h-full object-contain" loading="lazy" />
+                    <img
+                      src={url}
+                      alt="custom sticker"
+                      className="w-full h-full object-contain"
+                    />
                   </button>
                 ))}
-              </div>
-            )}
-            {/* Upload shortcut visible from any pack */}
-            {stickerPack !== "Custom" && (
-              <button
-                onClick={() => handleUpload("sticker")}
-                disabled={uploading}
-                className="flex items-center justify-center gap-1.5 w-full py-1.5 rounded-lg border border-dashed border-border/60 text-muted-foreground text-[10px] font-semibold hover:bg-secondary/40 active:scale-95"
-              >
-                <Upload className="w-3 h-3" />
-                {uploading ? "Uploading..." : "Upload custom sticker"}
-              </button>
-            )}
-            {selectedEmoji && (
-              <p className="text-[10px] text-muted-foreground text-center">Tap on the page to place</p>
-            )}
-          </div>
-        )}
 
-        {/* Washi tape picker — categorized PNG images */}
-        {activeTool === "washi" && (
-          <div className="space-y-2">
-            {/* Category list */}
-            <div className="space-y-1 max-h-[200px] overflow-y-auto">
-              {Object.entries(WASHI_CATEGORIES).map(([category, patterns]) => (
-                <div key={category}>
-                  <button
-                    onClick={() => setExpandedWashiCategory(expandedWashiCategory === category ? null : category)}
-                    className="flex items-center gap-1 w-full px-2 py-1.5 rounded-md text-[11px] font-semibold text-foreground/70 hover:bg-secondary/40 transition-all"
-                  >
-                    {expandedWashiCategory === category ? <ChevronDown className="w-3 h-3" /> : <ChevronRight className="w-3 h-3" />}
-                    {category}
-                    <span className="text-[9px] text-muted-foreground ml-1">({patterns.length})</span>
-                  </button>
-                  {expandedWashiCategory === category && (
-                    <div className="grid grid-cols-2 gap-1.5 px-1 pb-1">
-                      {patterns.map((pattern) => (
-                        <button
-                          key={pattern.imageUrl}
-                          onClick={() => setSelectedWashi(selectedWashi?.imageUrl === pattern.imageUrl ? null : pattern)}
-                          className={`h-9 rounded-lg transition-all active:scale-95 relative overflow-hidden ${
-                            selectedWashi?.imageUrl === pattern.imageUrl ? "ring-2 ring-primary/60" : ""
-                          }`}
-                        >
-                          <img src={pattern.imageUrl} alt={pattern.name} className="w-full h-full object-cover" loading="lazy" />
-                          <span className="absolute inset-0 flex items-center justify-center text-[10px] font-bold text-foreground/60 mix-blend-multiply">
-                            {pattern.name}
-                          </span>
-                        </button>
-                      ))}
-                    </div>
-                  )}
-                </div>
-              ))}
-            </div>
-            {/* Custom washi */}
-            <div className="flex gap-1.5 flex-wrap">
-              {customWashi.map((url) => (
-                <div key={url} className="relative group">
-                  <button
-                    onClick={() => setSelectedWashi(selectedWashi?.imageUrl === url ? null : { name: "Custom", colors: [], style: "image", imageUrl: url })}
-                    className={`h-9 w-24 rounded-lg overflow-hidden transition-all active:scale-95 ${
-                      selectedWashi?.imageUrl === url ? "ring-2 ring-primary/60" : ""
-                    }`}
-                  >
-                    <img src={url} alt="custom washi" className="w-full h-full object-cover" loading="lazy" />
-                  </button>
-                  <button
-                    onClick={() => handleDelete(url, "washi")}
-                    className="absolute -top-1 -right-1 w-5 h-5 bg-destructive text-destructive-foreground rounded-full flex items-center justify-center active:scale-90 shadow-sm"
-                  >
-                    <X className="w-2.5 h-2.5" />
-                  </button>
-                </div>
-              ))}
-              <button
-                onClick={() => handleUpload("washi")}
-                disabled={uploading}
-                className="h-9 w-24 rounded-lg border-2 border-dashed border-border/60 flex items-center justify-center text-muted-foreground hover:bg-secondary/40 active:scale-95"
-              >
-                <Upload className="w-3.5 h-3.5 mr-1" />
-                <span className="text-[10px] font-semibold">Upload</span>
-              </button>
-            </div>
-            {/* Washi controls: orientation + length */}
-            <div className="flex items-center gap-3">
-              <div className="flex gap-1">
+                {/* Upload button inside Custom */}
                 <button
-                  onClick={() => setWashiOrientation("horizontal")}
-                  className={`px-2 py-1 rounded text-[10px] font-semibold transition-all ${washiOrientation === "horizontal" ? "bg-primary text-primary-foreground" : "bg-secondary/50 text-foreground/60"}`}
+                  onClick={() => handleUpload("sticker")}
+                  disabled={uploading}
+                  className="h-12 rounded-lg border-2 border-dashed border-border/60 flex items-center justify-center text-muted-foreground hover:bg-secondary/40 active:scale-95 col-span-4"
                 >
-                  ― Horizontal
-                </button>
-                <button
-                  onClick={() => setWashiOrientation("vertical")}
-                  className={`px-2 py-1 rounded text-[10px] font-semibold transition-all ${washiOrientation === "vertical" ? "bg-primary text-primary-foreground" : "bg-secondary/50 text-foreground/60"}`}
-                >
-                  | Vertical
+                  <Upload className="w-4 h-4 mr-1" />
+                  <span className="text-[10px] font-semibold">Upload Sticker</span>
                 </button>
               </div>
-              <div className="flex items-center gap-2 flex-1 min-w-0">
-                <span className="text-[10px] text-muted-foreground whitespace-nowrap">Length</span>
-                <input
-                  type="range"
-                  min={60}
-                  max={400}
-                  step={16}
-                  value={washiLength}
-                  onChange={(e) => setWashiLength(Number(e.target.value))}
-                  className="flex-1 h-2 accent-primary"
-                />
-                <span className="text-[10px] text-muted-foreground w-8">{washiLength}</span>
-              </div>
-            </div>
-            {selectedWashi && <p className="text-[10px] text-muted-foreground text-center">Tap on the page to place washi tape</p>}
+            )}
+
           </div>
         )}
+      </div>
+    ))}
+
+  </div>
+)}
+
+{/* Washi tape picker — categorized PNG images */}
+{activeTool === "washi" && (
+  <div className="space-y-2">
+
+    {/* Category list */}
+    <div className="space-y-1 max-h-[200px] overflow-y-auto">
+      {Object.entries(WASHI_CATEGORIES).map(([category, patterns]) => (
+        <div key={category}>
+
+          <button
+            onClick={() =>
+              setExpandedWashiCategory(
+                expandedWashiCategory === category ? null : category
+              )
+            }
+            className="flex items-center gap-1 w-full px-2 py-1.5 rounded-md text-[11px] font-semibold text-foreground/70 hover:bg-secondary/40 transition-all"
+          >
+            {expandedWashiCategory === category ? (
+              <ChevronDown className="w-3 h-3" />
+            ) : (
+              <ChevronRight className="w-3 h-3" />
+            )}
+            {category}
+            <span className="text-[9px] text-muted-foreground ml-1">
+              ({patterns.length})
+            </span>
+          </button>
+
+          {expandedWashiCategory === category && (
+            <div className="grid grid-cols-2 gap-1.5 px-1 pb-1">
+
+              {/* Built‑in washi patterns */}
+              {patterns.map((pattern) => (
+                <button
+                  key={pattern.imageUrl}
+                  onClick={() =>
+                    setSelectedWashi(
+                      selectedWashi?.imageUrl === pattern.imageUrl
+                        ? null
+                        : pattern
+                    )
+                  }
+                  className={`h-9 rounded-lg transition-all active:scale-95 relative overflow-hidden ${
+                    selectedWashi?.imageUrl === pattern.imageUrl
+                      ? "ring-2 ring-primary/60"
+                      : ""
+                  }`}
+                >
+                  <img
+                    src={pattern.imageUrl}
+                    alt={pattern.name}
+                    className="w-full h-full object-cover"
+                  />
+                  <span className="absolute inset-0 flex items-center justify-center text-[10px] font-bold text-foreground/60 mix-blend-multiply">
+                    {pattern.name}
+                  </span>
+                </button>
+              ))}
+
+              {/* Custom Washi Section */}
+              {category === "Custom" && customWashi.length > 0 && (
+                <div className="grid grid-cols-6 gap-1 mt-1 col-span-2">
+                  {customWashi.map((url) => (
+                    <button key={url} className="p-1 rounded-lg aspect-square w-full hover:bg-secondary/40">
+                      <img src={url} alt="custom washi" className="w-full h-full object-contain" />
+                    </button>
+                  ))}
+                </div>
+              )}
+            </div>
+          )}
+        </div>
+      ))}
+    </div>
+  </div>
+)}
 
         {/* Text tool */}
         {activeTool === "text" && (
@@ -599,6 +587,6 @@ export function DecorationToolbar({
           </div>
         )}
       </div>
-    </div>
-  );
+</div>
+);
 }
