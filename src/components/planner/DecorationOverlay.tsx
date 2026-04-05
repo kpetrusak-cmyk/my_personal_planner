@@ -640,9 +640,9 @@ const resolvedKey = useMemo(() => {
     setSelectedItemId(null);
     const pt = getPoint(e);
 
-    if (activeTool === "sticker" && selectedEmoji) {
+    if (activeTool === "sticker" && selectedSticker) {
       setPlaced(prev => [...prev, {
-        id: crypto.randomUUID(), type: "sticker", content: selectedEmoji,
+        id: crypto.randomUUID(), type: "sticker", content: selectedSticker,
         x: snapToGrid(pt.x), y: snapToGrid(pt.y),
         width: DEFAULT_STICKER_SIZE, height: DEFAULT_STICKER_SIZE,
       }]);
@@ -878,7 +878,7 @@ const resolvedKey = useMemo(() => {
         <DecorationToolbar
           activeTool={activeTool}
           setActiveTool={setActiveTool}
-          selectedEmoji={selectedEmoji}
+          selectedSticker={selectedSticker}
           setSelectedEmoji={setSelectedEmoji}
           selectedWashi={selectedWashi}
           setSelectedWashi={setSelectedWashi}
