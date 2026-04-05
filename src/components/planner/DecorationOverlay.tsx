@@ -431,20 +431,30 @@ const resolvedKey = useMemo(() => {
   return pageKey;
 }, [pageKey, date]);
 
-  const { placed, strokes, loading, setPlaced, setStrokes, clearAll, undo } = useDecorations(resolvedKey);
-  const [decorating, setDecorating] = useState(false);
-  const [activeTool, setActiveTool] = useState<DecoTool>(null);
-  const [selectedSticker, setSelectedSticker] = useState<string | null>(null);
-  const [selectedWashi, setSelectedWashi] = useState<WashiPattern | null>(null);
-  const [penColor, setPenColor] = useState(PEN_COLORS[0]);
-  const [highlighterColor, setHighlighterColor] = useState(HIGHLIGHTER_COLORS[0]);
-  const [washiOrientation, setWashiOrientation] = useState<"horizontal" | "vertical">("horizontal");
-  const [washiLength, setWashiLength] = useState(DEFAULT_WASHI_LENGTH);
-  const [selectedItemId, setSelectedItemId] = useState<string | null>(null);
-  const [isBold, setIsBold] = useState(false);
-  const [editingTextId, setEditingTextId] = useState<string | null>(null);
+const { placed, strokes, loading, setPlaced, setStrokes, clearAll, undo } =
+  useDecorations(resolvedKey);
 
-  const canvasRef = useRef<HTMLCanvasElement>(null);
+const [decorating, setDecorating] = useState(false);
+const [activeTool, setActiveTool] = useState<DecoTool>(null);
+
+const [selectedSticker, setSelectedSticker] = useState<{
+  name: string;
+  style: string;
+  imageUrl: string;
+} | null>(null);
+
+const [selectedWashi, setSelectedWashi] = useState<WashiPattern | null>(null);
+const [penColor, setPenColor] = useState(PEN_COLORS[0]);
+const [highlighterColor, setHighlighterColor] = useState(HIGHLIGHTER_COLORS[0]);
+const [washiOrientation, setWashiOrientation] =
+  useState<"horizontal" | "vertical">("horizontal");
+const [washiLength, setWashiLength] = useState(DEFAULT_WASHI_LENGTH);
+const [selectedItemId, setSelectedItemId] = useState<string | null>(null);
+const [isBold, setIsBold] = useState(false);
+const [editingTextId, setEditingTextId] = useState<string | null>(null);
+  
+
+const canvasRef = useRef<HTMLCanvasElement>(null);
   const containerRef = useRef<HTMLDivElement>(null);
   const isDrawing = useRef(false);
   const currentStroke = useRef<DrawStroke | null>(null);
@@ -642,7 +652,7 @@ const resolvedKey = useMemo(() => {
 
     if (activeTool === "sticker" && selectedSticker) {
       setPlaced(prev => [...prev, {
-        id: crypto.randomUUID(), type: "sticker", content: selectedSticker,
+        id: crypto.randomUUID(), type: "sticker", content: selectedSticker.imageUrl,
         x: snapToGrid(pt.x), y: snapToGrid(pt.y),
         width: DEFAULT_STICKER_SIZE, height: DEFAULT_STICKER_SIZE,
       }]);
