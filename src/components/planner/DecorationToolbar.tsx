@@ -6,7 +6,7 @@ import { uploadDecorationImage, loadCustomUploads, deleteCustomUpload, type Wash
 export type DecoTool = "sticker" | "washi" | "pen" | "highlighter" | "eraser" | "text" | null;
 
 // PNG sticker packs — each entry is a path under /stickers/
-const STICKER_PACKS: Record<string, string[]> = {
+const STICKER_CATEGORIES: Record<string, string[]> = {
   "Flowers": [
     "/stickers/flowers/cherry-blossom.png",
     "/stickers/flowers/hibiscus.png",
