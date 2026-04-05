@@ -434,7 +434,7 @@ const resolvedKey = useMemo(() => {
   const { placed, strokes, loading, setPlaced, setStrokes, clearAll, undo } = useDecorations(resolvedKey);
   const [decorating, setDecorating] = useState(false);
   const [activeTool, setActiveTool] = useState<DecoTool>(null);
-  const [selectedEmoji, setSelectedEmoji] = useState<string | null>(null);
+  const [selectedSticker, setSelectedSticker] = useState<string | null>(null);
   const [selectedWashi, setSelectedWashi] = useState<WashiPattern | null>(null);
   const [penColor, setPenColor] = useState(PEN_COLORS[0]);
   const [highlighterColor, setHighlighterColor] = useState(HIGHLIGHTER_COLORS[0]);
@@ -879,7 +879,7 @@ const resolvedKey = useMemo(() => {
           activeTool={activeTool}
           setActiveTool={setActiveTool}
           selectedSticker={selectedSticker}
-          setSelectedEmoji={setSelectedEmoji}
+          setSelectedSticker={setSelectedSticker}
           selectedWashi={selectedWashi}
           setSelectedWashi={setSelectedWashi}
           penColor={penColor}
