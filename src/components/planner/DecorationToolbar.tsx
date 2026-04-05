@@ -256,8 +256,8 @@ export function renderWashiPattern(pattern: WashiPattern) {
 interface DecorationToolbarProps {
   activeTool: DecoTool;
   setActiveTool: (t: DecoTool) => void;
-  selectedEmoji: string | null;
-  setSelectedEmoji: (e: string | null) => void;
+  selectedSticker: { name: string; style: string; imageUrl: string } | null;
+  setSelectedSticker: (s: { name: string; style: string; imageUrl: string } | null) => void;
   selectedWashi: WashiPattern | null;
   setSelectedWashi: (w: WashiPattern | null) => void;
   penColor: string;
@@ -277,7 +277,7 @@ interface DecorationToolbarProps {
 
 export function DecorationToolbar({
   activeTool, setActiveTool,
-  selectedEmoji, setSelectedEmoji,
+  selectedSticker, setSelectedSticker,
   selectedWashi, setSelectedWashi,
   penColor, setPenColor,
   highlighterColor, setHighlighterColor,
@@ -323,7 +323,7 @@ export function DecorationToolbar({
     if (ok) {
       if (type === "sticker") {
         setCustomStickers(prev => prev.filter(u => u !== url));
-        if (selectedEmoji === url) setSelectedEmoji(null);
+        if (selectedSticker?.imageUrl === url) setSelectedSticker(null);
       } else {
         setCustomWashi(prev => prev.filter(u => u !== url));
         if (selectedWashi?.imageUrl === url) setSelectedWashi(null);
@@ -340,46 +340,61 @@ export function DecorationToolbar({
   ];
 
   return (
-    <div className="fixed bottom-16 left-0 right-0 z-50 bg-card/98 backdrop-blur-md border-t border-border/50 shadow-lg max-h-[50vh] overflow-y-auto" style={{ paddingBottom: "env(safe-area-inset-bottom, 0px)" }}>
+    <div
+      className="fixed bottom-16 left-0 right-0 z-50 bg-card/98 backdrop-blur-md border-t border-border/50 shadow-lg max-h-[50vh] overflow-y-auto"
+      style={{ paddingBottom: "env(safe-area-inset-bottom, 0px)" }}
+    >
       <div className="max-w-2xl mx-auto px-3 py-2 space-y-2">
         {/* Header */}
         <div className="flex items-center justify-between">
           <span className="text-xs font-bold text-foreground/70">🎨 Decorating</span>
           <div className="flex gap-1.5">
-            <button onClick={onUndo} className="flex items-center gap-1 px-2 py-1 bg-secondary/60 text-foreground/60 rounded-md text-[10px] font-semibold active:scale-95">
+            <button
+              onClick={onUndo}
+              className="flex items-center gap-1 px-2 py-1 bg-secondary/60 text-foreground/60 rounded-md text-[10px] font-semibold active:scale-95"
+            >
               <Undo2 className="w-3 h-3" /> Undo
             </button>
-            <button onClick={onClearAll} className="flex items-center gap-1 px-2 py-1 bg-destructive/10 text-destructive rounded-md text-[10px] font-semibold active:scale-95">
+            <button
+              onClick={onClearAll}
+              className="flex items-center gap-1 px-2 py-1 bg-destructive/10 text-destructive rounded-md text-[10px] font-semibold active:scale-95"
+            >
               <Trash2 className="w-3 h-3" /> Clear
             </button>
-            <button onClick={onClose} className="p-1 rounded-md bg-secondary/60 text-foreground/60 active:scale-95">
+            <button
+              onClick={onClose}
+              className="p-1 rounded-md bg-secondary/60 text-foreground/60 active:scale-95"
+            >
               <X className="w-4 h-4" />
             </button>
           </div>
         </div>
 
-        {/* Tool bar */}
-        <div className="flex gap-1 justify-center flex-wrap">
-          {toolButtons.map(({ tool, icon: Icon, label }) => (
-            <button
-              key={tool}
-              onClick={() => setActiveTool(activeTool === tool ? null : tool)}
-              className={`flex items-center gap-1 px-2.5 py-1.5 rounded-lg text-[11px] font-semibold transition-all active:scale-95 ${
-                activeTool === tool ? "bg-primary text-primary-foreground" : "bg-secondary/60 text-foreground/70"
-              }`}
-            >
-              <Icon className="w-3.5 h-3.5" />
-              {label}
-            </button>
-          ))}
-        </div>
+{/* Tool bar */}
+<div className="flex gap-1 justify-center flex-wrap">
+  {toolButtons.map(({ tool, icon: Icon, label }) => (
+    <button
+      key={tool}
+      onClick={() => setActiveTool(activeTool === tool ? null : tool)}
+      className={`flex items-center gap-1 px-2.5 py-1.5 rounded-lg text-[11px] font-semibold transition-all active:scale-95 ${
+        activeTool === tool
+          ? "bg-primary text-primary-foreground"
+          : "bg-secondary/60 text-foreground/70"
+      }`}
+    >
+      <Icon className="w-3.5 h-3.5" />
+      {label}
+    </button>
+  ))}
+</div>
 
-        {/* Sticker picker — collapsible categories */}
+{/* Sticker picker — collapsible categories */}
 {activeTool === "sticker" && (
   <div className="space-y-1 max-h-[200px] overflow-y-auto">
 
     {Object.entries(STICKER_CATEGORIES).map(([category, stickers]) => (
       <div key={category}>
+
         {/* Category header */}
         <button
           onClick={() =>
@@ -406,38 +421,48 @@ export function DecorationToolbar({
 
             {/* Built‑in stickers */}
             {stickers.map((url) => (
-  <button
-    key={url}
-    onClick={() =>
-      setSelectedSticker({
-        name: category,
-        style: "image",
-        imageUrl: url,
-      })
-    }
-    className="p-1 rounded-lg hover:bg-secondary/40"
-  >
-    <img
-      src={url}
-      alt={category}
-      className="w-full h-full object-contain"
-    />
-  </button>
-))}
+              <button
+                key={url}
+                onClick={() =>
+                  setSelectedSticker(
+                    selectedSticker?.imageUrl === url
+                      ? null
+                      : { name: category, style: "image", imageUrl: url }
+                  )
+                }
+                className={`p-1 rounded-lg transition-all ${
+                  selectedSticker?.imageUrl === url
+                    ? "bg-primary/15 ring-2 ring-primary/40"
+                    : "hover:bg-secondary/40"
+                }`}
+              >
+                <img
+                  src={url}
+                  alt={category}
+                  className="w-full h-full object-contain"
+                />
+              </button>
+            ))}
+
             {/* Custom Sticker Section */}
             {category === "Custom" && customStickers.length > 0 && (
               <div className="grid grid-cols-4 gap-1 mt-1 col-span-4">
+
                 {customStickers.map((url) => (
                   <button
                     key={url}
                     onClick={() =>
-                      setSelectedSticker({
-                        name: "Custom",
-                        style: "image",
-                        imageUrl: url,
-                      })
+                      setSelectedSticker(
+                        selectedSticker?.imageUrl === url
+                          ? null
+                          : { name: "Custom", style: "image", imageUrl: url }
+                      )
                     }
-                    className="p-1 rounded-lg aspect-square w-full hover:bg-secondary/40"
+                    className={`p-1 rounded-lg aspect-square w-full transition-all ${
+                      selectedSticker?.imageUrl === url
+                        ? "bg-primary/15 ring-2 ring-primary/40"
+                        : "hover:bg-secondary/40"
+                    }`}
                   >
                     <img
                       src={url}
@@ -471,127 +496,134 @@ export function DecorationToolbar({
 {activeTool === "washi" && (
   <div className="space-y-1 max-h-[200px] overflow-y-auto">
 
-    {/* Category list */}
-    <div className="space-y-1 max-h-[200px] overflow-y-auto">
-      {Object.entries(WASHI_CATEGORIES).map(([category, patterns]) => (
-        <div key={category}>
+    {Object.entries(WASHI_CATEGORIES).map(([category, patterns]) => (
+      <div key={category}>
 
-          <button
-            onClick={() =>
-              setExpandedWashiCategory(
-                expandedWashiCategory === category ? null : category
-              )
-            }
-            className="flex items-center gap-1 w-full px-2 py-1.5 rounded-md text-[11px] font-semibold text-foreground/70 hover:bg-secondary/40 transition-all"
-          >
-            {expandedWashiCategory === category ? (
-              <ChevronDown className="w-3 h-3" />
-            ) : (
-              <ChevronRight className="w-3 h-3" />
-            )}
-            {category}
-            <span className="text-[9px] text-muted-foreground ml-1">
-              ({patterns.length})
-            </span>
-          </button>
-
-          {expandedWashiCategory === category && (
-            <div className="grid grid-cols-2 gap-1.5 px-1 pb-1">
-
-              {/* Built‑in washi patterns */}
-              {patterns.map((pattern) => (
-                <button
-                  key={pattern.imageUrl}
-                  onClick={() =>
-                    setSelectedWashi(
-                      selectedWashi?.imageUrl === pattern.imageUrl
-                        ? null
-                        : pattern
-                    )
-                  }
-                  className={`h-9 rounded-lg transition-all active:scale-95 relative overflow-hidden ${
-                    selectedWashi?.imageUrl === pattern.imageUrl
-                      ? "ring-2 ring-primary/60"
-                      : ""
-                  }`}
-                >
-                  <img
-                    src={pattern.imageUrl}
-                    alt={pattern.name}
-                    className="w-full h-full object-cover"
-                  />
-                  <span className="absolute inset-0 flex items-center justify-center text-[10px] font-bold text-foreground/60 mix-blend-multiply">
-                    {pattern.name}
-                  </span>
-                </button>
-              ))}
-
-              {/* Custom Washi Section */}
-              {category === "Custom" && customWashi.length > 0 && (
-                <div className="grid grid-cols-6 gap-1 mt-1 col-span-2">
-                  {customWashi.map((url) => (
-                    <button key={url} className="p-1 rounded-lg aspect-square w-full hover:bg-secondary/40">
-                      <img src={url} alt="custom washi" className="w-full h-full object-contain" />
-                    </button>
-                  ))}
-                </div>
-              )}
-            </div>
+        {/* Category header */}
+        <button
+          onClick={() =>
+            setExpandedWashiCategory(
+              expandedWashiCategory === category ? null : category
+            )
+          }
+          className="flex items-center gap-1 w-full px-2 py-1.5 rounded-md text-[11px] font-semibold text-foreground/70 hover:bg-secondary/40 transition-all"
+        >
+          {expandedWashiCategory === category ? (
+            <ChevronDown className="w-3 h-3" />
+          ) : (
+            <ChevronRight className="w-3 h-3" />
           )}
-        </div>
-      ))}
-    </div>
-  </div>
-)}
+          {category}
+          <span className="text-[9px] text-muted-foreground ml-1">
+            ({patterns.length})
+          </span>
+        </button>
 
-        {/* Text tool */}
-        {activeTool === "text" && (
-          <div className="space-y-2">
-            <p className="text-[10px] text-muted-foreground text-center">Tap on the page to add a text decoration</p>
-            <div className="flex items-center justify-center gap-2">
+        {/* Expanded category content */}
+        {expandedWashiCategory === category && (
+          <div className="grid grid-cols-2 gap-1.5 px-1 pb-1">
+
+            {/* Built‑in washi patterns */}
+            {patterns.map((pattern) => (
               <button
-                onClick={() => setIsBold(!isBold)}
-                className={`flex items-center gap-1 px-3 py-1.5 rounded-lg text-[11px] font-semibold transition-all active:scale-95 ${
-                  isBold ? "bg-primary text-primary-foreground" : "bg-secondary/60 text-foreground/70"
+                key={pattern.imageUrl}
+                onClick={() =>
+                  setSelectedWashi(
+                    selectedWashi?.imageUrl === pattern.imageUrl
+                      ? null
+                      : pattern
+                  )
+                }
+                className={`h-9 rounded-lg transition-all active:scale-95 relative overflow-hidden ${
+                  selectedWashi?.imageUrl === pattern.imageUrl
+                    ? "ring-2 ring-primary/60"
+                    : ""
                 }`}
               >
-                <Bold className="w-3.5 h-3.5" />
-                Bold
+                <img
+                  src={pattern.imageUrl}
+                  alt={pattern.name}
+                  className="w-full h-full object-cover"
+                />
+                <span className="absolute inset-0 flex items-center justify-center text-[10px] font-bold text-foreground/60 mix-blend-multiply">
+                  {pattern.name}
+                </span>
               </button>
-            </div>
-          </div>
-        )}
-
-        {/* Pen colors */}
-        {activeTool === "pen" && (
-          <div className="flex items-center gap-2 justify-center py-1">
-            <Palette className="w-3.5 h-3.5 text-muted-foreground" />
-            {PEN_COLORS.map((c) => (
-              <button
-                key={c}
-                onClick={() => setPenColor(c)}
-                className={`w-6 h-6 rounded-full transition-all active:scale-90 ${penColor === c ? "ring-2 ring-offset-2 ring-primary" : ""}`}
-                style={{ background: c }}
-              />
             ))}
-          </div>
-        )}
 
-        {/* Highlighter colors */}
-        {activeTool === "highlighter" && (
-          <div className="flex items-center gap-2 justify-center py-1">
-            <Palette className="w-3.5 h-3.5 text-muted-foreground" />
-            {HIGHLIGHTER_COLORS.map((c) => (
-              <button
-                key={c}
-                onClick={() => setHighlighterColor(c)}
-                className={`w-6 h-6 rounded-full transition-all active:scale-90 border border-border/40 ${highlighterColor === c ? "ring-2 ring-offset-2 ring-primary" : ""}`}
-                style={{ background: c.replace(/[\d.]+\)$/, "1)") }}
-              />
-            ))}
+            {/* Custom Washi Section */}
+            {category === "Custom" && customWashi.length > 0 && (
+              <div className="grid grid-cols-6 gap-1 mt-1 col-span-2">
+
+                {customWashi.map((url) => (
+                  <button
+                    key={url}
+                    onClick={() =>
+                      setSelectedWashi(
+                        selectedWashi?.imageUrl === url
+                          ? null
+                          : { name: "Custom", style: "image", imageUrl: url }
+                      )
+                    }
+                    className={`p-1 rounded-lg aspect-square w-full transition-all ${
+                      selectedWashi?.imageUrl === url
+                        ? "ring-2 ring-primary/60 bg-primary/10"
+                        : "hover:bg-secondary/40"
+                    }`}
+                  >
+                    <img
+                      src={url}
+                      alt="custom washi"
+                      className="w-full h-full object-contain"
+                    />
+                  </button>
+                ))}
+
+              </div>
+            )}
+
           </div>
         )}
       </div>
-</div>
-);
-}
+    ))}
+
+  </div>
+)}
+{/* Pen colors */}
+{activeTool === "pen" && (
+  <div className="flex items-center gap-2 justify-center py-1">
+    <Palette className="w-3.5 h-3.5 text-muted-foreground" />
+    {PEN_COLORS.map((c) => (
+      <button
+        key={c}
+        onClick={() => setPenColor(c)}
+        className={`w-6 h-6 rounded-full transition-all active:scale-90 ${
+          penColor === c ? "ring-2 ring-offset-2 ring-primary" : ""
+        }`}
+        style={{ background: c }}
+      />
+    ))}
+  </div>
+)}
+
+{/* Highlighter colors */}
+{activeTool === "highlighter" && (
+  <div className="flex items-center gap-2 justify-center py-1">
+    <Palette className="w-3.5 h-3.5 text-muted-foreground" />
+    {HIGHLIGHTER_COLORS.map((c) => (
+      <button
+        key={c}
+        onClick={() => setHighlighterColor(c)}
+        className={`w-6 h-6 rounded-full transition-all active:scale-90 border border-border/40 ${
+          highlighterColor === c ? "ring-2 ring-offset-2 ring-primary" : ""
+        }`}
+        style={{ background: c.replace(/[\d.]+\)$/, "1)") }}
+      />
+    ))}
+  </div>
+)}
+
+      </div> 
+    </div>
+  );
+}         

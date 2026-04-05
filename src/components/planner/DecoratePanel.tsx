@@ -3,37 +3,220 @@ import { Smile, Scissors, Pen, Highlighter, Eraser, Undo2, Trash2, Upload, Palet
 
 type Tool = "sticker" | "washi" | "pen" | "highlighter" | "eraser" | null;
 
-const EMOJI_PACKS = {
-  "Flowers": ["🌸", "🌺", "🌻", "🌷", "🌹", "💐", "🌼", "🪻", "🌿", "🍀", "🌱", "🪴"],
-  "Stars & Hearts": ["⭐", "✨", "💫", "🌟", "💖", "💗", "💕", "❤️", "🩷", "🩵", "💜", "🤍"],
-  "Cute": ["🎀", "🧸", "🦋", "🐝", "🐞", "🌈", "☁️", "🍓", "🍰", "🧁", "🫧", "✏️"],
-  "Planner": ["📌", "📎", "🗓️", "📝", "✅", "⏰", "💡", "🎯", "🏷️", "📖", "🔖", "🗂️"],
-  "Weather": ["☀️", "🌤️", "⛅", "🌧️", "⛈️", "🌩️", "❄️", "🌬️", "🌊", "🌙", "🌕", "💧"],
-  "Food": ["🍕", "🥑", "🍩", "☕", "🧋", "🍪", "🍫", "🥐", "🧇", "🍑", "🍒", "🫐"],
-  "Animals": ["🐱", "🐶", "🦊", "🐰", "🐻", "🦄", "🐸", "🐧", "🦢", "🕊️", "🐾", "🦎"],
-  "Travel": ["✈️", "🗺️", "🏖️", "⛰️", "🎡", "🚲", "🌅", "🏕️", "🧳", "🗼", "🎪", "⛵"],
-  "Zodiac": ["♈", "♉", "♊", "♋", "♌", "♍", "♎", "♏", "♐", "♑", "♒", "♓"],
-  "Symbols": ["☮️", "☯️", "♾️", "🔮", "🧿", "🪬", "💎", "🪩", "🎵", "🎶", "🕯️", "🧘"],
+const STICKER_CATEGORIES: Record<string, string[]> = {
+  "Flowers": [
+    "/stickers/flowers/cherry-blossom.png",
+    "/stickers/flowers/hibiscus.png",
+    "/stickers/flowers/sunflower.png",
+    "/stickers/flowers/tulip.png",
+    "/stickers/flowers/rose.png",
+    "/stickers/flowers/bouquet.png",
+    "/stickers/flowers/daisy.png",
+    "/stickers/flowers/lavender.png",
+    "/stickers/flowers/clover.png",
+    "/stickers/flowers/seedling.png",
+    "/stickers/flowers/potted-plant.png",
+    "/stickers/flowers/leaves.png",
+  ],
+  "Stars & Hearts": [
+    "/stickers/stars-hearts/star.png",
+    "/stickers/stars-hearts/sparkle.png",
+    "/stickers/stars-hearts/heart-pink.png",
+    "/stickers/stars-hearts/heart-red.png",
+    "/stickers/stars-hearts/rainbow.png",
+  ],
+  "Cute": [
+    "/stickers/cute/bow.png",
+    "/stickers/cute/teddy-bear.png",
+    "/stickers/cute/butterfly.png",
+    "/stickers/cute/strawberry.png",
+    "/stickers/cute/cupcake.png",
+  ],
+  "Planner": [
+    "/stickers/planner/pushpin.png",
+    "/stickers/planner/paperclip.png",
+    "/stickers/planner/checkmark.png",
+    "/stickers/planner/alarm-clock.png",
+    "/stickers/planner/lightbulb.png",
+    "/stickers/planner/target.png",
+  ],
+  "Animals": [
+    "/stickers/animals/cat.png",
+    "/stickers/animals/dog.png",
+    "/stickers/animals/fox.png",
+    "/stickers/animals/bunny.png",
+    "/stickers/animals/unicorn.png",
+  ],
+"Holidays": [
+  "/stickers/holidays/balloon.png",
+  "/stickers/holidays/candy-cane.png",
+  "/stickers/holidays/heart.png",
+  "/stickers/holidays/ornament.png",
+  "/stickers/holidays/party-popper.png",
+  "/stickers/holidays/shamrock.png",
+  "/stickers/holidays/sparkler.png",
+  "/stickers/holidays/star-gold.png",
+],
+  "Food": [
+    "/stickers/food/pizza.png",
+    "/stickers/food/coffee.png",
+    "/stickers/food/donut.png",
+    "/stickers/food/avocado.png",
+    "/stickers/food/cookie.png",
+    "/stickers/food/boba.png",
+  ],
+"Coffee & Meals": [
+  "/stickers/coffee-meals/breakfast.png",
+  "/stickers/coffee-meals/coffee-cup.png",
+  "/stickers/coffee-meals/dinner.png",
+  "/stickers/coffee-meals/latte.png",
+  "/stickers/coffee-meals/lunch-bag.png",
+  "/stickers/coffee-meals/tea.png",
+],
+  "Travel": [
+    "/stickers/travel/airplane.png",
+    "/stickers/travel/beach.png",
+    "/stickers/travel/mountain.png",
+    "/stickers/travel/suitcase.png",
+    "/stickers/travel/bicycle.png",
+    "/stickers/travel/camping.png",
+  ],
+  "Nature": [
+    "/stickers/nature/moon.png",
+    "/stickers/nature/sun.png",
+    "/stickers/nature/autumn-leaves.png",
+    "/stickers/nature/wave.png",
+    "/stickers/nature/mushroom.png",
+    "/stickers/nature/seashell.png",
+  ],
+  "Seasonal": [
+    "/stickers/seasonal/pumpkin.png",
+    "/stickers/seasonal/christmas-tree.png",
+    "/stickers/seasonal/snowflake.png",
+    "/stickers/seasonal/fireworks.png",
+    "/stickers/seasonal/birthday-cake.png",
+    "/stickers/seasonal/gift.png",
+  ],
+  "School & Work": [
+  "/stickers/school-work/assignment.png",
+  "/stickers/school-work/deadline.png",
+  "/stickers/school-work/exam.png",
+  "/stickers/school-work/focus.png",
+  "/stickers/school-work/lecture.png",
+  "/stickers/school-work/meeting.png",
+  "/stickers/school-work/study.png",
+],
+  "Bills": [
+    "/stickers/bills/money.png",
+    "/stickers/bills/credit-card.png",
+    "/stickers/bills/house.png",
+    "/stickers/bills/piggy-bank.png",
+    "/stickers/bills/receipt.png",
+  ],
+  "Appointments": [
+    "/stickers/appointments/stethoscope.png",
+    "/stickers/appointments/tooth.png",
+    "/stickers/appointments/clipboard.png",
+    "/stickers/appointments/medicine.png",
+    "/stickers/appointments/appointment.png",
+  ],
+  "Custom": [],
 };
 
-const WASHI_PATTERNS = [
-  { name: "Rose", colors: ["hsl(340, 30%, 80%)", "hsl(340, 30%, 85%)"], style: "striped" },
-  { name: "Lavender", colors: ["hsl(300, 24%, 76%)", "hsl(300, 30%, 85%)"], style: "dotted" },
-  { name: "Sage", colors: ["hsl(140, 15%, 70%)", "hsl(140, 15%, 78%)"], style: "striped" },
-  { name: "Cream", colors: ["hsl(30, 33%, 90%)", "hsl(30, 20%, 85%)"], style: "solid" },
-  { name: "Plum", colors: ["hsl(303, 16%, 42%)", "hsl(303, 16%, 52%)"], style: "striped" },
-  { name: "Gold", colors: ["hsl(42, 60%, 70%)", "hsl(42, 60%, 78%)"], style: "dotted" },
-  { name: "Sky", colors: ["hsl(200, 45%, 78%)", "hsl(200, 45%, 85%)"], style: "striped" },
-  { name: "Peach", colors: ["hsl(20, 60%, 82%)", "hsl(20, 50%, 88%)"], style: "solid" },
-  { name: "Mint", colors: ["hsl(160, 35%, 75%)", "hsl(160, 30%, 82%)"], style: "dotted" },
-  { name: "Coral", colors: ["hsl(10, 55%, 72%)", "hsl(10, 50%, 80%)"], style: "striped" },
-  { name: "Lilac", colors: ["hsl(270, 30%, 80%)", "hsl(270, 25%, 87%)"], style: "dotted" },
-  { name: "Blush", colors: ["hsl(350, 40%, 86%)", "hsl(350, 35%, 90%)"], style: "solid" },
-  { name: "Ocean", colors: ["hsl(210, 40%, 60%)", "hsl(210, 35%, 70%)"], style: "striped" },
-  { name: "Honey", colors: ["hsl(38, 65%, 72%)", "hsl(38, 55%, 80%)"], style: "dotted" },
-  { name: "Moss", colors: ["hsl(100, 20%, 55%)", "hsl(100, 18%, 65%)"], style: "striped" },
-  { name: "Dusk", colors: ["hsl(260, 20%, 65%)", "hsl(260, 18%, 75%)"], style: "solid" },
-];
+// PNG washi patterns organized by category
+export const WASHI_CATEGORIES: Record<string, WashiPattern[]> = {
+  "Classic": [
+    { name: "Rose", colors: [], style: "image", imageUrl: "/washi/rose.png" },
+    { name: "Lavender", colors: [], style: "image", imageUrl: "/washi/lavender.png" },
+    { name: "Sage", colors: [], style: "image", imageUrl: "/washi/sage.png" },
+    { name: "Cream", colors: [], style: "image", imageUrl: "/washi/cream.png" },
+    { name: "Plum", colors: [], style: "image", imageUrl: "/washi/plum.png" },
+    { name: "Gold", colors: [], style: "image", imageUrl: "/washi/gold.png" },
+    { name: "Sky", colors: [], style: "image", imageUrl: "/washi/sky.png" },
+    { name: "Peach", colors: [], style: "image", imageUrl: "/washi/peach.png" },
+    { name: "Mint", colors: [], style: "image", imageUrl: "/washi/mint.png" },
+    { name: "Coral", colors: [], style: "image", imageUrl: "/washi/coral.png" },
+    { name: "Lilac", colors: [], style: "image", imageUrl: "/washi/lilac.png" },
+    { name: "Blush", colors: [], style: "image", imageUrl: "/washi/blush.png" },
+    { name: "Ocean", colors: [], style: "image", imageUrl: "/washi/ocean.png" },
+    { name: "Honey", colors: [], style: "image", imageUrl: "/washi/honey.png" },
+    { name: "Moss", colors: [], style: "image", imageUrl: "/washi/moss.png" },
+    { name: "Dusk", colors: [], style: "image", imageUrl: "/washi/dusk.png" },
+  ],
+  "Floral": [
+    { name: "Cherry Blossom", colors: [], style: "image", imageUrl: "/washi/floral/cherry-blossom.png" },
+    { name: "Sunflower", colors: [], style: "image", imageUrl: "/washi/floral/sunflower.png" },
+    { name: "Wildflower", colors: [], style: "image", imageUrl: "/washi/floral/wildflower.png" },
+    { name: "Rose Vine", colors: [], style: "image", imageUrl: "/washi/floral/rose-vine.png" },
+    { name: "Daisy", colors: [], style: "image", imageUrl: "/washi/floral/daisy.png" },
+    { name: "Tropical Leaves", colors: [], style: "image", imageUrl: "/washi/floral/tropical-leaves.png" },
+    { name: "Forget-Me-Not", colors: [], style: "image", imageUrl: "/washi/floral/forget-me-not.png" },
+  ],
+  "Holidays": [
+    { name: "Christmas", colors: [], style: "image", imageUrl: "/washi/holidays/christmas.png" },
+    { name: "Easter", colors: [], style: "image", imageUrl: "/washi/holidays/easter.png" },
+    { name: "Valentines", colors: [], style: "image", imageUrl: "/washi/holidays/valentines.png" },
+    { name: "Halloween", colors: [], style: "image", imageUrl: "/washi/holidays/halloween.png" },
+    { name: "Birthday", colors: [], style: "image", imageUrl: "/washi/holidays/birthday.png" },
+    { name: "Thanksgiving", colors: [], style: "image", imageUrl: "/washi/holidays/thanksgiving.png" },
+    { name: "New Year", colors: [], style: "image", imageUrl: "/washi/holidays/new-year.png" },
+  ],
+  "Seasons": [
+    { name: "Spring", colors: [], style: "image", imageUrl: "/washi/seasons/spring.png" },
+    { name: "Summer", colors: [], style: "image", imageUrl: "/washi/seasons/summer.png" },
+    { name: "Autumn", colors: [], style: "image", imageUrl: "/washi/seasons/autumn.png" },
+    { name: "Winter", colors: [], style: "image", imageUrl: "/washi/seasons/winter.png" },
+    { name: "Rainy Day", colors: [], style: "image", imageUrl: "/washi/seasons/rainy-day.png" },
+  ],
+  "Minimal": [
+    { name: "Stripes", colors: [], style: "image", imageUrl: "/washi/minimal/stripes.png" },
+    { name: "Dots", colors: [], style: "image", imageUrl: "/washi/minimal/dots.png" },
+    { name: "Grid", colors: [], style: "image", imageUrl: "/washi/minimal/grid.png" },
+    { name: "Crosshatch", colors: [], style: "image", imageUrl: "/washi/minimal/crosshatch.png" },
+  ],
+  "Patterns": [
+    { name: "Chevron", colors: [], style: "image", imageUrl: "/washi/patterns/chevron.png" },
+    { name: "Plaid", colors: [], style: "image", imageUrl: "/washi/patterns/plaid.png" },
+    { name: "Gingham", colors: [], style: "image", imageUrl: "/washi/patterns/gingham.png" },
+    { name: "Argyle", colors: [], style: "image", imageUrl: "/washi/patterns/argyle.png" },
+    { name: "Houndstooth", colors: [], style: "image", imageUrl: "/washi/patterns/houndstooth.png" },
+    { name: "Puppy Love", colors: [], style: "image", imageUrl: "/washi/patterns/puppy-love.png" },
+  ],
+  "Neutral": [
+    { name: "Linen", colors: [], style: "image", imageUrl: "/washi/neutral/linen.png" },
+    { name: "Kraft", colors: [], style: "image", imageUrl: "/washi/neutral/kraft.png" },
+    { name: "Terrazzo", colors: [], style: "image", imageUrl: "/washi/neutral/terrazzo.png" },
+    { name: "Oatmeal", colors: [], style: "image", imageUrl: "/washi/neutral/oatmeal.png" },
+    { name: "Concrete", colors: [], style: "image", imageUrl: "/washi/neutral/concrete.png" },
+  ],
+  "Cute": [
+    { name: "Cats", colors: [], style: "image", imageUrl: "/washi/cute/cats.png" },
+    { name: "Stars & Moons", colors: [], style: "image", imageUrl: "/washi/cute/stars-moons.png" },
+    { name: "Rainbows", colors: [], style: "image", imageUrl: "/washi/cute/rainbows.png" },
+    { name: "Sweets", colors: [], style: "image", imageUrl: "/washi/cute/sweets.png" },
+    { name: "Dogs", colors: [], style: "image", imageUrl: "/washi/cute/dogs.png" },
+    { name: "Dog Bones", colors: [], style: "image", imageUrl: "/washi/cute/dog-bones.png" },
+    { name: "Corgi", colors: [], style: "image", imageUrl: "/washi/cute/corgi.png" },
+    { name: "Bunnies", colors: [], style: "image", imageUrl: "/washi/cute/bunnies.png" },
+    { name: "Chihuahua", colors: [], style: "image", imageUrl: "/washi/cute/chihuahua.png" },
+    { name: "Yorkie", colors: [], style: "image", imageUrl: "/washi/cute/yorkie.png" },
+  ],
+  "Functional": [
+    { name: "Checklist", colors: [], style: "image", imageUrl: "/washi/functional/checklist.png" },
+    { name: "Schedule", colors: [], style: "image", imageUrl: "/washi/functional/schedule.png" },
+    { name: "Days", colors: [], style: "image", imageUrl: "/washi/functional/days.png" },
+    { name: "Dividers", colors: [], style: "image", imageUrl: "/washi/functional/dividers.png" },
+    { name: "Arrows", colors: [], style: "image", imageUrl: "/washi/functional/arrows.png" },
+  ],
+  "Abstract": [
+    { name: "Watercolor", colors: [], style: "image", imageUrl: "/washi/abstract/watercolor.png" },
+    { name: "Geometric", colors: [], style: "image", imageUrl: "/washi/abstract/geometric.png" },
+    { name: "Marble", colors: [], style: "image", imageUrl: "/washi/abstract/marble.png" },
+    { name: "Splatter", colors: [], style: "image", imageUrl: "/washi/abstract/splatter.png" },
+    { name: "Ink Brush", colors: [], style: "image", imageUrl: "/washi/abstract/ink-brush.png" },
+  ],
+  "Custom": []
+};
 
 const PEN_COLORS = [
   "hsl(303, 16%, 42%)",   // plum
@@ -59,7 +242,7 @@ interface Placed {
   content: string;
   x: number;
   y: number;
-  washiPattern?: typeof WASHI_PATTERNS[0];
+  washiPattern?: WashiPattern;
 }
 
 interface DrawStroke {
@@ -71,13 +254,18 @@ interface DrawStroke {
 
 export function DecoratePanel() {
   const [activeTool, setActiveTool] = useState<Tool>(null);
-  const [selectedEmoji, setSelectedEmoji] = useState<string | null>(null);
-  const [selectedWashi, setSelectedWashi] = useState<typeof WASHI_PATTERNS[0] | null>(null);
-  const [placed, setPlaced] = useState<Placed[]>([]);
+const [selectedSticker, setSelectedSticker] = useState<{
+  name: string;
+  style: string;
+  imageUrl: string;
+} | null>(null);
+const [selectedWashi, setSelectedWashi] = useState<WashiPattern | null>(null);
+const [placed, setPlaced] = useState<Placed[]>([]);
   const [strokes, setStrokes] = useState<DrawStroke[]>([]);
   const [penColor, setPenColor] = useState(PEN_COLORS[0]);
   const [highlighterColor, setHighlighterColor] = useState(HIGHLIGHTER_COLORS[0]);
-  const [emojiPack, setEmojiPack] = useState<keyof typeof EMOJI_PACKS>("Flowers");
+  const [stickerCategory, setStickerCategory] =
+  useState<keyof typeof STICKER_CATEGORIES>("Flowers");
   const [dragging, setDragging] = useState<string | null>(null);
   const [dragOffset, setDragOffset] = useState({ x: 0, y: 0 });
 
@@ -194,11 +382,31 @@ export function DecoratePanel() {
     const x = e.clientX - rect.left;
     const y = e.clientY - rect.top;
 
-    if (activeTool === "sticker" && selectedEmoji) {
-      setPlaced((prev) => [...prev, { id: crypto.randomUUID(), type: "sticker", content: selectedEmoji, x, y }]);
-    } else if (activeTool === "washi" && selectedWashi) {
-      setPlaced((prev) => [...prev, { id: crypto.randomUUID(), type: "washi", content: selectedWashi.name, x, y: y - 17, washiPattern: selectedWashi }]);
+    if (activeTool === "sticker" && selectedSticker) {
+  setPlaced((prev) => [
+    ...prev,
+    {
+      id: crypto.randomUUID(),
+      type: "sticker",
+      content: selectedSticker.imageUrl,
+      x,
+      y
     }
+  ]);
+}
+else if (activeTool === "washi" && selectedWashi) {
+  setPlaced((prev) => [
+    ...prev,
+    {
+      id: crypto.randomUUID(),
+      type: "washi",
+      content: selectedWashi.imageUrl,
+      x,
+      y: y - 17,
+      washiPattern: selectedWashi
+    }
+  ]);
+}
   };
 
   const handleDragStart = (id: string, e: React.MouseEvent | React.TouchEvent) => {
@@ -227,8 +435,8 @@ export function DecoratePanel() {
 
   const removeItem = (id: string) => setPlaced((prev) => prev.filter((p) => p.id !== id));
 
-  const renderWashiPattern = (pattern: typeof WASHI_PATTERNS[0], width = 120) => {
-    if (pattern.style === "striped") {
+const renderWashiPattern = (pattern: WashiPattern, width = 120) => {
+  if (pattern.style === "striped") {
       return `repeating-linear-gradient(135deg, ${pattern.colors[0]} 0px, ${pattern.colors[0]} 4px, ${pattern.colors[1]} 4px, ${pattern.colors[1]} 8px)`;
     }
     if (pattern.style === "dotted") {
@@ -267,187 +475,246 @@ export function DecoratePanel() {
         ))}
       </div>
 
-      {/* Sticker picker */}
-      {activeTool === "sticker" && (
-        <div className="planner-card p-3 space-y-2">
-          <div className="flex gap-1 overflow-x-auto no-scrollbar">
-            {Object.keys(EMOJI_PACKS).map((pack) => (
-              <button
-                key={pack}
-                onClick={() => setEmojiPack(pack as keyof typeof EMOJI_PACKS)}
-                className={`px-2.5 py-1 rounded-full text-[10px] font-semibold whitespace-nowrap transition-all ${
-                  emojiPack === pack ? "bg-primary text-primary-foreground" : "bg-secondary/50 text-foreground/60"
-                }`}
-              >
-                {pack}
-              </button>
-            ))}
-          </div>
-          <div className="grid grid-cols-6 gap-1">
-            {EMOJI_PACKS[emojiPack].map((emoji) => (
-              <button
-                key={emoji}
-                onClick={() => setSelectedEmoji(selectedEmoji === emoji ? null : emoji)}
-                className={`text-2xl p-1.5 rounded-lg transition-all active:scale-90 ${
-                  selectedEmoji === emoji ? "bg-primary/15 ring-2 ring-primary/40" : "hover:bg-secondary/40"
-                }`}
-              >
-                {emoji}
-              </button>
-            ))}
-          </div>
-          {selectedEmoji && (
-            <p className="text-[10px] text-muted-foreground text-center">Tap on the canvas to place {selectedEmoji}</p>
-          )}
-        </div>
-      )}
+{/* Sticker picker */}
+{activeTool === "sticker" && (
+  <div className="planner-card p-3 space-y-2">
+    <div className="flex gap-1 overflow-x-auto no-scrollbar">
+      {Object.keys(STICKER_CATEGORIES).map((category) => (
+        <button
+          key={category}
+          onClick={() => setStickerCategory(category as keyof typeof STICKER_CATEGORIES)}
+          className={`px-2.5 py-1 rounded-full text-[10px] font-semibold whitespace-nowrap transition-all ${
+            stickerCategory === category
+              ? "bg-primary text-primary-foreground"
+              : "bg-secondary/50 text-foreground/60"
+          }`}
+        >
+          {category}
+        </button>
+      ))}
+    </div>
 
-      {/* Washi tape picker */}
-      {activeTool === "washi" && (
-        <div className="planner-card p-3 space-y-2">
-          <p className="text-[10px] text-muted-foreground font-semibold uppercase tracking-wider">Select tape pattern</p>
-          <div className="grid grid-cols-2 gap-2">
-            {WASHI_PATTERNS.map((pattern) => (
-              <button
-                key={pattern.name}
-                onClick={() => setSelectedWashi(selectedWashi?.name === pattern.name ? null : pattern)}
-                className={`h-10 rounded-lg transition-all active:scale-95 relative overflow-hidden ${
-                  selectedWashi?.name === pattern.name ? "ring-2 ring-primary/60" : ""
-                }`}
-                style={{ background: renderWashiPattern(pattern) }}
-              >
-                <span className="absolute inset-0 flex items-center justify-center text-[10px] font-bold text-foreground/60 mix-blend-multiply">
-                  {pattern.name}
-                </span>
-              </button>
-            ))}
-          </div>
-          {selectedWashi && (
-            <p className="text-[10px] text-muted-foreground text-center">Tap on the canvas to place washi tape</p>
-          )}
-        </div>
-      )}
+    <div className="grid grid-cols-6 gap-1">
+      {STICKER_CATEGORIES[stickerCategory].map((url) => (
+        <button
+          key={url}
+          onClick={() =>
+            setSelectedSticker(
+              selectedSticker?.imageUrl === url
+                ? null
+                : {
+                    name: stickerCategory,
+                    style: "image",
+                    imageUrl: url,
+                  }
+            )
+          }
+          className={`text-2xl p-1.5 rounded-lg transition-all active:scale-90 ${
+            selectedSticker?.imageUrl === url
+              ? "bg-primary/15 ring-2 ring-primary/40"
+              : "hover:bg-secondary/40"
+          }`}
+        >
+          <img
+            src={url}
+            alt={stickerCategory}
+            className="w-full h-full object-contain"
+          />
+        </button>
+      ))}
+    </div>
 
-      {/* Pen color picker */}
-      {activeTool === "pen" && (
-        <div className="planner-card p-3">
-          <div className="flex items-center gap-2 justify-center">
-            <Palette className="w-3.5 h-3.5 text-muted-foreground" />
-            {PEN_COLORS.map((c) => (
-              <button
-                key={c}
-                onClick={() => setPenColor(c)}
-                className={`w-7 h-7 rounded-full transition-all active:scale-90 ${penColor === c ? "ring-2 ring-offset-2 ring-primary" : ""}`}
-                style={{ background: c }}
-              />
-            ))}
-          </div>
-        </div>
-      )}
+    {selectedSticker && (
+      <p className="text-[10px] text-muted-foreground text-center">
+        Tap on the canvas to place a sticker
+      </p>
+    )}
+  </div>
+)}
 
-      {/* Highlighter color picker */}
-      {activeTool === "highlighter" && (
-        <div className="planner-card p-3">
-          <div className="flex items-center gap-2 justify-center">
-            <Palette className="w-3.5 h-3.5 text-muted-foreground" />
-            {HIGHLIGHTER_COLORS.map((c) => (
-              <button
-                key={c}
-                onClick={() => setHighlighterColor(c)}
-                className={`w-7 h-7 rounded-full transition-all active:scale-90 border border-border/40 ${highlighterColor === c ? "ring-2 ring-offset-2 ring-primary" : ""}`}
-                style={{ background: c.replace(/[\d.]+\)$/, "1)") }}
-              />
-            ))}
-          </div>
-        </div>
-      )}
+{/* Washi tape picker */}
+{activeTool === "washi" && (
+  <div className="planner-card p-3 space-y-2">
+    <p className="text-[10px] text-muted-foreground font-semibold uppercase tracking-wider">
+      Select tape pattern
+    </p>
 
-      {/* Canvas area */}
-      <div
-        ref={containerRef}
-        className="planner-card relative overflow-hidden"
-        style={{ minHeight: 400, touchAction: (activeTool === "pen" || activeTool === "highlighter" || activeTool === "eraser") ? "none" : "auto" }}
-        onClick={handleCanvasClick}
-        onMouseMove={handleDragMove}
-        onMouseUp={handleDragEnd}
-        onTouchMove={handleDragMove}
-        onTouchEnd={handleDragEnd}
-      >
-        {/* Drawing canvas */}
-        <canvas
-          ref={canvasRef}
-          className="absolute inset-0 w-full h-full"
-          style={{ zIndex: 1, pointerEvents: (activeTool === "pen" || activeTool === "highlighter" || activeTool === "eraser") ? "auto" : "none" }}
-          onMouseDown={startDraw}
-          onMouseMove={moveDraw}
-          onMouseUp={endDraw}
-          onMouseLeave={endDraw}
-          onTouchStart={startDraw}
-          onTouchMove={moveDraw}
-          onTouchEnd={endDraw}
+    <div className="grid grid-cols-2 gap-2">
+      {Object.values(WASHI_CATEGORIES).flat().map((pattern) => (
+        <button
+          key={pattern.name}
+          onClick={() =>
+            setSelectedWashi(
+              selectedWashi?.name === pattern.name ? null : pattern
+            )
+          }
+          className={`h-10 rounded-lg transition-all active:scale-95 relative overflow-hidden ${
+            selectedWashi?.name === pattern.name ? "ring-2 ring-primary/60" : ""
+          }`}
+          style={{ background: renderWashiPattern(pattern) }}
+        >
+          <span className="absolute inset-0 flex items-center justify-center text-[10px] font-bold text-foreground/60 mix-blend-multiply">
+            {pattern.name}
+          </span>
+        </button>
+      ))}
+    </div>
+
+    {selectedWashi && (
+      <p className="text-[10px] text-muted-foreground text-center">
+        Tap on the canvas to place washi tape
+      </p>
+    )}
+  </div>
+)}
+
+{/* Pen color picker */}
+{activeTool === "pen" && (
+  <div className="planner-card p-3">
+    <div className="flex items-center gap-2 justify-center">
+      <Palette className="w-3.5 h-3.5 text-muted-foreground" />
+      {PEN_COLORS.map((c) => (
+        <button
+          key={c}
+          onClick={() => setPenColor(c)}
+          className={`w-7 h-7 rounded-full transition-all active:scale-90 ${
+            penColor === c ? "ring-2 ring-offset-2 ring-primary" : ""
+          }`}
+          style={{ background: c }}
         />
+      ))}
+    </div>
+  </div>
+)}
 
-        {/* Placed items */}
-        {placed.map((item) => (
-          <div
-            key={item.id}
-            className="absolute select-none"
-            style={{
-              left: item.x - (item.type === "sticker" ? 20 : 0),
-              top: item.y - (item.type === "sticker" ? 20 : 0),
-              zIndex: dragging === item.id ? 30 : 10,
-              cursor: "grab",
-            }}
-            onMouseDown={(e) => handleDragStart(item.id, e)}
-            onTouchStart={(e) => handleDragStart(item.id, e)}
-            onDoubleClick={() => removeItem(item.id)}
-          >
-            {item.type === "sticker" ? (
-              <span className="text-4xl drop-shadow-sm">{item.content}</span>
-            ) : (
-              <div
-                className="h-[34px] rounded-sm opacity-80"
-                style={{
-                  width: 160,
-                  background: item.washiPattern ? renderWashiPattern(item.washiPattern) : "hsl(var(--accent))",
-                }}
-              />
-            )}
-          </div>
-        ))}
-
-        {/* Empty state */}
-        {placed.length === 0 && strokes.length === 0 && (
-          <div className="absolute inset-0 flex items-center justify-center z-0">
-            <div className="text-center space-y-2 text-muted-foreground/40">
-              <div className="text-4xl">🌸✨🎀</div>
-              <p className="text-sm">Select a tool above and start decorating!</p>
-              <p className="text-[10px]">Double-tap stickers to remove them</p>
-            </div>
-          </div>
-        )}
-      </div>
-
-      {/* Bottom actions */}
-      <div className="flex gap-2 justify-center">
+{/* Highlighter color picker */}
+{activeTool === "highlighter" && (
+  <div className="planner-card p-3">
+    <div className="flex items-center gap-2 justify-center">
+      <Palette className="w-3.5 h-3.5 text-muted-foreground" />
+      {HIGHLIGHTER_COLORS.map((c) => (
         <button
-          onClick={() => {
-            if (strokes.length > 0) setStrokes((prev) => prev.slice(0, -1));
-            else if (placed.length > 0) setPlaced((prev) => prev.slice(0, -1));
+          key={c}
+          onClick={() => setHighlighterColor(c)}
+          className={`w-7 h-7 rounded-full transition-all active:scale-90 border border-border/40 ${
+            highlighterColor === c ? "ring-2 ring-offset-2 ring-primary" : ""
+          }`}
+          style={{ background: c.replace(/[\d.]+\)$/, "1)") }}
+        />
+      ))}
+    </div>
+  </div>
+)}
+
+  {/* Canvas area */}
+<div
+  ref={containerRef}
+  className="planner-card relative overflow-hidden"
+  style={{
+    minHeight: 400,
+    touchAction:
+      activeTool === "pen" ||
+      activeTool === "highlighter" ||
+      activeTool === "eraser"
+        ? "none"
+        : "auto",
+  }}
+  onClick={handleCanvasClick}
+  onMouseMove={handleDragMove}
+  onMouseUp={handleDragEnd}
+  onTouchMove={handleDragMove}
+  onTouchEnd={handleDragEnd}
+>
+  {/* Drawing canvas */}
+  <canvas
+    ref={canvasRef}
+    className="absolute inset-0 w-full h-full"
+    style={{
+      zIndex: 1,
+      pointerEvents:
+        activeTool === "pen" ||
+        activeTool === "highlighter" ||
+        activeTool === "eraser"
+          ? "auto"
+          : "none",
+    }}
+    onMouseDown={startDraw}
+    onMouseMove={moveDraw}
+    onMouseUp={endDraw}
+    onMouseLeave={endDraw}
+    onTouchStart={startDraw}
+    onTouchMove={moveDraw}
+    onTouchEnd={endDraw}
+  />
+
+  {/* Placed items */}
+  {placed.map((item) => (
+    <div
+      key={item.id}
+      className="absolute select-none"
+      style={{
+        left: item.x - (item.type === "sticker" ? 20 : 0),
+        top: item.y - (item.type === "sticker" ? 20 : 0),
+        zIndex: dragging === item.id ? 30 : 10,
+        cursor: "grab",
+      }}
+      onMouseDown={(e) => handleDragStart(item.id, e)}
+      onTouchStart={(e) => handleDragStart(item.id, e)}
+      onDoubleClick={() => removeItem(item.id)}
+    >
+      {item.type === "sticker" ? (
+        <img
+          src={item.content}
+          alt="sticker"
+          className="w-10 h-10 object-contain drop-shadow-sm"
+        />
+      ) : (
+        <div
+          className="h-[34px] rounded-sm opacity-80"
+          style={{
+            width: 160,
+            background: item.washiPattern
+              ? renderWashiPattern(item.washiPattern)
+              : "hsl(var(--accent))",
           }}
-          className="flex items-center gap-1.5 px-3 py-2 bg-secondary/60 text-foreground/60 rounded-lg text-xs font-semibold transition-all active:scale-95"
-        >
-          <Undo2 className="w-3.5 h-3.5" />
-          Undo
-        </button>
-        <button
-          onClick={() => { setPlaced([]); setStrokes([]); }}
-          className="flex items-center gap-1.5 px-3 py-2 bg-destructive/10 text-destructive rounded-lg text-xs font-semibold transition-all active:scale-95"
-        >
-          <Trash2 className="w-3.5 h-3.5" />
-          Clear All
-        </button>
+        />
+      )}
+    </div>
+  ))}
+
+  {/* Empty state */}
+  {placed.length === 0 && strokes.length === 0 && (
+    <div className="absolute inset-0 flex items-center justify-center z-0">
+      <div className="text-center space-y-2 text-muted-foreground/40">
+        <div className="text-4xl">🌸✨🎀</div>
+        <p className="text-sm">Select a tool above and start decorating!</p>
+        <p className="text-[10px]">Double-tap stickers to remove them</p>
       </div>
     </div>
-  );
-}
+  )}
+</div>
+
+{/* Bottom actions */}
+<div className="flex gap-2 justify-center">
+  <button
+    onClick={() => {
+      if (strokes.length > 0) setStrokes((prev) => prev.slice(0, -1));
+      else if (placed.length > 0) setPlaced((prev) => prev.slice(0, -1));
+    }}
+    className="flex items-center gap-1.5 px-3 py-2 bg-secondary/60 text-foreground/60 rounded-lg text-xs font-semibold transition-all active:scale-95"
+  >
+    <Undo2 className="w-3.5 h-3.5" />
+    Undo
+  </button>
+
+  <button
+    onClick={() => {
+      setPlaced([]);
+      setStrokes([]);
+    }}
+    className="flex items-center gap-1.5 px-3 py-2 bg-destructive/10 text-destructive rounded-lg text-xs font-semibold transition-all active:scale-95"
+  >
+    <Trash2 className="w-3.5 h-3.5" />
+    Clear All
+  </button>
+</div>
