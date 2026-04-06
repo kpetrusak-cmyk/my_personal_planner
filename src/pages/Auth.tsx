@@ -38,7 +38,7 @@ export default function Auth() {
     <div className="min-h-screen bg-background flex items-center justify-center px-4">
       <div className="w-full max-w-sm space-y-6">
         <div className="text-center">
-          <h1 className="planner-heading text-3xl">My Planner</h1>
+          <h1 className="planner-heading text-3xl">My Cozy Planner</h1>
           <p className="text-sm text-muted-foreground mt-1">
             {isLogin ? "Welcome back" : "Create your account"}
           </p>

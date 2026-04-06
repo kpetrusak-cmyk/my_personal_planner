@@ -57,7 +57,7 @@ const Index = () => {
       case "reflection":
         return { title: format(planner.currentDate, "MMMM"), subtitle: format(planner.currentDate, "yyyy"), onPrev: planner.prevMonth, onNext: planner.nextMonth };
       default:
-        return { title: "My Planner", subtitle: undefined, onPrev: () => {}, onNext: () => {} };
+        return { title: "My Cozy Planner", subtitle: undefined, onPrev: () => {}, onNext: () => {} };
     }
   };
 

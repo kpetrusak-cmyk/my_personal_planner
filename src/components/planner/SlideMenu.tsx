@@ -102,7 +102,7 @@ export function SlideMenu({ open, onClose, onNavigate }: SlideMenuProps) {
         }`}
       >
         <div className="flex items-center justify-between p-4 border-b border-border/40">
-          <h2 className="planner-heading text-lg">My Planner</h2>
+          <h2 className="planner-heading text-lg">My Cozy Planner</h2>
           <button onClick={onClose} className="p-1.5 rounded-lg hover:bg-secondary active:scale-95 transition-all">
             <X className="w-5 h-5 text-muted-foreground" />
           </button>

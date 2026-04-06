@@ -20,15 +20,15 @@ export default defineConfig(({ mode }) => ({
     react(),
     VitePWA({
       registerType: "autoUpdate",
-      includeAssets: ["placeholder.svg"],
+      includeAssets: ["favicon.ico", "pwa-icon-192.png", "pwa-icon-512.png"],
       workbox: {
         navigateFallbackDenylist: [/^\/~oauth/],
         globPatterns: ["**/*.{js,css,html,ico,png,svg,woff2}"],
       },
       manifest: {
-        name: "My 2026 Planner",
+        name: "My Cozy Planner",
         short_name: "Planner",
-        description: "A full-featured digital planner for 2026",
+        description: "A full-featured digital planner for everyday life",
         theme_color: "#7d5b7a",
         background_color: "#faf7f2",
         display: "standalone",
