@@ -26,45 +26,54 @@ export function MonthlyCalendar({ date }: MonthlyCalendarProps) {
         <p className="planner-heading text-xl">{format(date, "MMMM yyyy")}</p>
       </div>
 
-      {/* Calendar Grid */}
-      <section className="planner-card p-3">
-        {/* Day headers */}
-        <div className="grid grid-cols-7 mb-1">
-          {dayLabels.map((d) => (
-            <div key={d} className="text-center text-[10px] font-bold uppercase tracking-wider text-muted-foreground py-1">
-              {d}
-            </div>
-          ))}
+{/* Calendar Grid */}
+<div className="w-full max-w-[900px] mx-auto aspect-square relative">
+  <section className="planner-card p-3 h-full">
+    {/* Day headers */}
+    <div className="grid grid-cols-7 mb-1">
+      {dayLabels.map((d) => (
+        <div
+          key={d}
+          className="text-center text-[10px] font-bold uppercase tracking-wider text-muted-foreground py-1"
+        >
+          {d}
         </div>
+      ))}
+    </div>
 
-        {/* Day cells */}
-        <div className="grid grid-cols-7 gap-px bg-border/30 rounded-lg overflow-hidden">
-          {days.map((day) => {
-            const key = format(day, "yyyy-MM-dd");
-            const isCurrentMonth = day.getMonth() === currentMonth;
-            const today = isSameDay(day, new Date());
-            return (
-              <div
-                key={key}
-                className={`min-h-[52px] p-1 bg-card ${
-                  !isCurrentMonth ? "opacity-30" : ""
-                } ${today ? "ring-1 ring-inset ring-primary/40" : ""}`}
-              >
-                <div className={`text-[10px] font-bold mb-0.5 ${today ? "text-primary" : "text-foreground/60"}`}>
-                  {format(day, "d")}
-                </div>
-                <input
-                  type="text"
-                  value={cellNotes[key] || ""}
-                  onChange={(e) => updateCell(key, e.target.value)}
-                  className="w-full text-[10px] font-handwritten bg-transparent outline-none placeholder:text-border"
-                  placeholder="·"
-                />
-              </div>
-            );
-          })}
-        </div>
-      </section>
+    {/* Day cells */}
+    <div className="grid grid-cols-7 gap-px bg-border/30 rounded-lg overflow-hidden h-full">
+      {days.map((day) => {
+        const key = format(day, "yyyy-MM-dd");
+        const isCurrentMonth = day.getMonth() === currentMonth;
+        const today = isSameDay(day, new Date());
+        return (
+          <div
+            key={key}
+            className={`min-h-[52px] p-1 bg-card ${
+              !isCurrentMonth ? "opacity-30" : ""
+            } ${today ? "ring-1 ring-inset ring-primary/40" : ""}`}
+          >
+            <div
+              className={`text-[10px] font-bold mb-0.5 ${
+                today ? "text-primary" : "text-foreground/60"
+              }`}
+            >
+              {format(day, "d")}
+            </div>
+            <input
+              type="text"
+              value={cellNotes[key] || ""}
+              onChange={(e) => updateCell(key, e.target.value)}
+              className="w-full text-[10px] font-handwritten bg-transparent outline-none placeholder:text-border"
+              placeholder="·"
+            />
+          </div>
+        );
+      })}
+    </div>
+  </section>
+</div>
 
       {/* Footer sections */}
       <div className="grid grid-cols-1 gap-3">
